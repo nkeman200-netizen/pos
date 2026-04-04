@@ -8,25 +8,25 @@ use function Livewire\Volt\{state, mount, computed};
 
 // 1. STATE (Variabel)
 // KITA UBAH: Jangan simpan seluruh object 'sale', cukup simpan ID dan Invoice-nya saja biar Livewire gak bingung!
-state([
+state([ //state yang disimpen di memori
     'sale_id' => '', 
     'invoice_number' => '',
     'cart' => [],
     'customerId' => '',
-    'pembayaran' => 0,
+    'pembayaran' => '',
     'selectedProductId' => '',
     'qty' => 1
 ]);
 
 // 2. MOUNT (Dijalankan sekali saat halaman dibuka)
-mount(function (Sale $sale) {
-    $this->sale_id = $sale->id;
+mount(function (Sale $sale) { //tangkep sale yang dikirim dari blade edit
+    $this->sale_id = $sale->id; //isi state
     $this->invoice_number = $sale->invoice_number;
     $this->customerId = $sale->customer_id;
-    $this->pembayaran = $sale->pembayaran;
+    $this->pembayaran = $sale->pembayaran; 
 
     // WAJIB: Load relasi detail beserta produknya supaya 'name' bisa kebaca!
-    $sale->load('details.product');
+    $sale->load('details.product');// Eager load untuk menghindari N+1 problem saat akses $item->product->name
 
     // Masukkan detail belanjaan lama ke array $cart
     foreach ($sale->details as $item) {
@@ -41,8 +41,9 @@ mount(function (Sale $sale) {
 });
 
 // 3. COMPUTED (Otomatis menghitung total)
+$pembayaranMurni = computed(fn () => (int) preg_replace('/[^0-9]/', '', (string)$this->pembayaran));
 $total = computed(fn () => collect($this->cart)->sum('subtotal'));
-$kembalian = computed(fn () => (int)$this->pembayaran - $this->total);
+$kembalian = computed(fn () => $this->pembayaranMurni - $this->total);
 
 // 4. ACTIONS (Logika)
 $addToCart = function () {
@@ -119,6 +120,15 @@ $updateTransaction = function () {
 ?>
 
 <div class="p-6">
+    <div class="mb-6">
+        <a href="{{ route('sales.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-indigo-600 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 19-7-7 7-7"/>
+                <path d="M19 12H5"/>
+            </svg>
+            Kembali ke Riwayat
+        </a>
+    </div>
     <!-- Alert Error -->
     @if (session()->has('error'))
         <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-xl font-bold">
@@ -163,7 +173,8 @@ $updateTransaction = function () {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @forelse($cart as $index => $item)
+                        @forelse($cart as $index => $item) 
+                        {{-- //foreach yg punya fitur empty kalau array kosong --}}
                         <tr>
                             <td class="px-4 py-3 font-medium">{{ $item['name'] }}</td>
                             <td class="px-4 py-3 text-right">Rp{{ number_format($item['unit_price']) }}</td>
@@ -200,8 +211,13 @@ $updateTransaction = function () {
                     <div class="text-3xl font-black text-yellow-700">Rp{{ number_format($this->total) }}</div>
                 </div>
 
-                <input type="number" wire:model.live="pembayaran" placeholder="Uang Bayar" class="w-full p-4 text-2xl font-bold border-2 rounded-xl focus:border-yellow-500 outline-none transition">
-                
+                <input 
+                    type="text" 
+                    x-mask:dynamic="$money($input, '.', ',')" 
+                    wire:model.live.debounce.300ms="pembayaran" 
+                    placeholder="Uang Bayar" 
+                    class="w-full p-4 text-2xl border-2 rounded-xl"
+                >  
                 <div class="flex justify-between font-bold px-2">
                     <span class="text-gray-500">Kembalian:</span>
                     <span class="{{ $this->kembalian < 0 ? 'text-red-500' : 'text-green-600' }} text-xl">Rp{{ number_format($this->kembalian) }}</span>

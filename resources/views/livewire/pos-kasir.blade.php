@@ -30,11 +30,13 @@ $addToCart = function () {
     if (!$this->selectedProductId) return; //kalo belum select product, tendang
 
     $product = Product::find($this->selectedProductId); //inisiasi objek product via id
-    if ($product->stock < $this->qty) {
-        session()->flash('error', 'Stok tidak cukup!');
+    $index = collect($this->cart)->search(fn($item) => $item['product_id'] == $product->id); //pencariannya berhasil kirim true. $item diambil dari isi setiap $this->cart
+    $totalQty=($index !== false ? $this->cart[$index]['quantity'] : 0) + (int)$this->qty; //total qty yang mau dimasukkan ke cart, kalo ternyata udah ada di cart, ya tinggal ditambahin quantitynya
+    
+    if ($product->stock < $totalQty) { //cek dulu stoknya, kalo kurang, ya kasih tau error
+        session()->flash('error', 'Stok ' . $product->name . ' tidak cukup! Tersisa: ' . $product->stock);
         return; // Berhenti di sini, jangan lanjut ke bawah
     }
-    $index = collect($this->cart)->search(fn($item) => $item['product_id'] == $product->id); //pencariannya berhasil kirim true. $item diambil dari isi setiap $this->cart
     // index akan berupa sebuah index dari array cart. atau berupa boolean false
     if ($index !== false) { //cek dgn strict cek, karena index 0 juga berarti false
         $this->cart[$index]['quantity'] += (int)$this->qty; //kalo ada di cart, update quantitynya dan subtoralnya  
@@ -51,7 +53,7 @@ $addToCart = function () {
     $this->selectedProductId = '';
 };
 
-$removeFromCart = function ($index) {
+$removeFromCart = function ($index) {//array splice untuk menghapus data di array berdasarkan index dan otomatis menggeser index setelahnya ke kiri
     array_splice($this->cart,$index,1);//parameter 1 untuk array apa, 2 untuk index berapa, 3 berapa banyak yang mau dihapus
 };
 
@@ -81,8 +83,30 @@ $saveTransaction = function ()  {
 ?>
 
 <div class="p-6">
+    <div class="mb-6">
+        <a href="{{ route('sales.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-indigo-600 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 19-7-7 7-7"/>
+                <path d="M19 12H5"/>
+            </svg>
+            Kembali ke Riwayat
+        </a>
+    </div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
+            @if (session()->has('error'))
+                <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                    <span class="font-bold">{{ session('error') }}</span>
+                </div>
+            @endif  
+
+            @if (session()->has('success'))
+                <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl flex items-center gap-2">
+                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    <span class="font-bold">{{ session('success') }}</span>
+                </div>
+            @endif
             <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <select wire:model="selectedProductId" class="p-3 border rounded-xl outline-none">
@@ -124,6 +148,7 @@ $saveTransaction = function ()  {
                     </tbody>
                 </table>
             </div>
+            
         </div>
 
         <div class="lg:col-span-1">
@@ -146,15 +171,10 @@ $saveTransaction = function ()  {
                     <span>Kembali:</span>
                     <span class="{{ $this->kembalian < 0 ? 'text-red-500' : 'text-green-600' }}">Rp{{ number_format($this->kembalian) }}</span>
                 </div>
-                <div class="flex gap-3 mt-4">
-                    <a href="{{ route('sales.index') }}" class="w-1/3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-4 rounded-xl flex items-center justify-center transition">
-                        KEMBALI
-                    </a>
 
                     <button wire:click="saveTransaction" class="w-2/3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg transition">
                         BAYAR
-                    </button>
-                </div>            
+                    </button>          
             </div>
         </div>
     </div>
