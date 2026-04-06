@@ -6,6 +6,7 @@ use App\Models\Sale;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use function Livewire\Volt\{state, computed};
+use function Livewire\Volt\{updated};
 
 // 1. STATE (Variabel)
 state([ //ingantan browser yang tidak hilang jika tidak direfresh   
@@ -13,25 +14,33 @@ state([ //ingantan browser yang tidak hilang jika tidak direfresh
     'customerId' => '',
     'pembayaran' => '',
     'selectedProductId' => '',
-    'qty' => 1
+    'qty' => 1,
+    'searchQuery' => '',     // BARU: Untuk nangkep ketikan pencarian
 ]);
 
-// Buat fungsi internal untuk mengubah "100.000" kembali jadi 100000
-$pembayaranMurni = function () {
-    return (int) str_replace('.', '', $this->pembayaran);
-};
 // 2. COMPUTED (Data Otomatis) kaya useEfect di spring, dia akan hitung ulang ketika state nya berubah
 $pembayaranMurni = computed(fn () => (int) preg_replace('/[^0-9]/', '', (string)$this->pembayaran));
 $total = computed(fn () => collect($this->cart)->sum('subtotal'));
 $kembalian = computed(fn () => $this->pembayaranMurni - $this->total);
+// BARU: Otomatis cari produk berdasarkan ketikan (Dibatasi 5 hasil saja biar cepat)
+$searchResults = computed(function () {
+    if (strlen($this->searchQuery) < 2) return collect(); // Jangan nyari kalau ketikan kurang dari 2 huruf
+    
+    return Product::where('name', 'like', '%' . $this->searchQuery . '%')
+                    ->where('stock', '>', 0)
+                    ->take(5) // Ambil 5 teratas
+                    ->get();
+});
+
 
 // 3. ACTIONS (Logika)
-$addToCart = function () {
-    if (!$this->selectedProductId) return; //kalo belum select product, tendang
+$addToCart = function ($idProduct) {
 
-    $product = Product::find($this->selectedProductId); //inisiasi objek product via id
+    if (!$idProduct) return; //kalo belum select product, tendang
+
+    $product = Product::find($idProduct); //inisiasi objek product via id
     $index = collect($this->cart)->search(fn($item) => $item['product_id'] == $product->id); //pencariannya berhasil kirim true. $item diambil dari isi setiap $this->cart
-    $totalQty=($index !== false ? $this->cart[$index]['quantity'] : 0) + (int)$this->qty; //total qty yang mau dimasukkan ke cart, kalo ternyata udah ada di cart, ya tinggal ditambahin quantitynya
+    $totalQty=($index !== false ? $this->cart[$index]['quantity'] : 0) + 1; //total qty yang mau dimasukkan ke cart, kalo ternyata udah ada di cart, ya tinggal ditambahin quantitynya
     
     if ($product->stock < $totalQty) { //cek dulu stoknya, kalo kurang, ya kasih tau error
         session()->flash('error', 'Stok ' . $product->name . ' tidak cukup! Tersisa: ' . $product->stock);
@@ -58,7 +67,10 @@ $removeFromCart = function ($index) {//array splice untuk menghapus data di arra
 };
 
 $saveTransaction = function ()  {
-    if (empty($this->cart) || $this->pembayaranMurni < $this->total) return; //cart ga boleh koosng, duit bayar ga boleh kurang
+    if (empty($this->cart) || $this->pembayaranMurni < $this->total) {
+        session()->flash('error', 'Pastikan keranjang tidak kosong dan pembayaran mencukupi!');
+        return;
+    }; //cart ga boleh koosng, duit bayar ga boleh kurang
 
     DB::transaction(function ()  { //kerjakan semua, atau batalkan semua jika gagal di tengah
         $sale = Sale::create([//buat tabel sales
@@ -80,7 +92,45 @@ $saveTransaction = function ()  {
 };
 
 
+// FUNGSI TAMBAH QTY DI KERANJANG
+
+$syncCart = function ($index) {
+    $item = $this->cart[$index];
+    $qty = (int) $item['quantity'];
+    
+    // 1. Minimal 1
+    if ($qty < 1) $qty = 1;
+
+    // 2. Cek Stok (Logika Edit vs Create)
+    $product = Product::find($item['product_id']);
+    
+    if ($qty > $product->stock) {
+        $qty = $product->stock;
+        session()->flash('error', "Stok {$product->name} tidak cukup!");
+    }
+
+    // 3. Update data di array cart
+    $this->cart[$index]['quantity'] = $qty;
+    $this->cart[$index]['subtotal'] = $qty * $item['unit_price'];
+};
+
+// Fungsi tombol +
+$incrementQty = function ($index) {
+    $this->cart[$index]['quantity']++;
+    $this->syncCart($index);
+};
+
+// Fungsi tombol -
+$decrementQty = function ($index) {
+    if ($this->cart[$index]['quantity'] > 1) {
+        $this->cart[$index]['quantity']--;
+        $this->syncCart($index);
+    }
+};
+
 ?>
+
+
 
 <div class="p-6">
     <div class="mb-6">
@@ -109,15 +159,62 @@ $saveTransaction = function ()  {
             @endif
             <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <select wire:model="selectedProductId" class="p-3 border rounded-xl outline-none">
-                        <option value="">-- Pilih Barang --</option>
-                        @foreach(App\Models\Product::where('stock', '>', 0)->get() as $p)
-                            <option value="{{ $p->id }}">{{ $p->name }} ({{ $p->stock }})</option>
-                        @endforeach
-                    </select>
-                    <div class="flex gap-2">
-                        <input type="number" wire:model="qty" class="w-20 p-3 border rounded-xl">
-                        <button wire:click="addToCart" class="flex-1 bg-indigo-600 text-white rounded-xl">Tambah</button>
+                    <div class="relative w-full" x-data="{ open: false }">
+                        {{-- xdata adalah deklarasi variabel, yg nanti dipake di hasil search--}}
+                        <div class="relative">
+                            <div wire:ignore class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                {{-- wire ignor, agar ga corupt DOM nya --}}
+                                <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+                            </div>
+                            <input 
+                                type="text" 
+                                wire:model.live.debounce.300ms="searchQuery" 
+                                @focus="open = true" 
+                                {{-- kalo diklik, hasil search nya dibuka --}}
+                                @click.outside="open = false" 
+                                {{-- kalo klik di luar input, hasil search nya ditutup --}}
+                                placeholder="Ketik nama obat (min. 2 huruf)..." 
+                                class="w-full pl-10 p-3 border rounded-xl outline-none focus:border-indigo-500 transition"
+                            >
+                            
+                            <div wire:loading 
+                                {{-- jalankan aksi ketika ada loading --}}
+                                wire:target="searchQuery" 
+                                {{-- loading mana? loading targetnya searchQuery --}}
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            >
+                                <i data-lucide="loader-2" class="w-5 h-5 text-indigo-500 animate-spin"></i>
+                            </div>
+                        </div>
+
+                        <div 
+                            x-show="open && $wire.searchQuery.length >= 2" 
+                            {{-- yang tadinya display none, pake xshow open (true) jadi kebuka --}}
+                            x-transition
+                            class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden"
+                            style="display: none;" 
+                        >
+                            <ul class="max-h-60 overflow-y-auto divide-y divide-gray-100">
+                                @forelse($this->searchResults as $product)
+                                    <li 
+                                        wire:click="addToCart({{ $product->id }}); $set('searchQuery', ''); open = false"
+                                        class="p-3 hover:bg-indigo-50 cursor-pointer transition flex justify-between items-center"
+                                    >
+                                        <div>
+                                            <div class="font-bold text-gray-700">{{ $product->name }}</div>
+                                            <div class="text-xs text-gray-500">Stok: {{ $product->stock }} | Rp{{ number_format($product->selling_price) }}</div>
+                                        </div>
+                                        <div class="text-indigo-600">
+                                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                                        </div>
+                                    </li>
+                                @empty
+                                    <li class="p-4 text-center text-gray-500 text-sm">
+                                        Tidak menemukan obat: "<span class="font-bold">{{ $searchQuery }}</span>"
+                                    </li>
+                                @endforelse
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -135,13 +232,36 @@ $saveTransaction = function ()  {
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach($cart as $index => $item)
-                        <tr>
-                            <td class="px-4 py-3">{{ $item['name'] }}</td>
-                            <td class="px-4 py-3">Rp{{ number_format($item['unit_price']) }}</td>
-                            <td class="px-4 py-3">{{ $item['quantity'] }}</td>
-                            <td class="px-4 py-3 font-bold">Rp{{ number_format($item['subtotal']) }}</td>
+                        {{-- WAJIB: wire:key supaya Livewire tidak bingung baris mana yang berubah --}}
+                        <tr wire:key="cart-item-{{ $item['product_id'] }}" class="hover:bg-gray-50 transition">
+                            <td class="px-4 py-3 font-medium">{{ $item['name'] }}</td>
+                            <td class="px-4 py-3 text-right">Rp{{ number_format($item['unit_price']) }}</td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center justify-center gap-3">
+                                    <button type="button" wire:click="decrementQty({{ $index }})" class="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-red-100 rounded-full text-gray-600 hover:text-red-600 font-black transition">
+                                        -
+                                    </button>
+                                    
+                                    <input 
+                                        type="number" 
+                                        {{-- 1. Menyimpan data secara 'deferred' (ditahan dulu, tidak langsung dikirim ke server) --}}
+                                        wire:model="cart.{{ $index }}.quantity"
+                                        
+                                        {{-- 2. Memaksa memanggil method syncCart setelah user berhenti ngetik selama 500ms --}}
+                                        wire:input.debounce.300ms="syncCart({{ $index }})"
+                                        class="w-12 text-center font-bold text-indigo-600 text-lg bg-transparent border-b-2 border-transparent focus:border-indigo-600 outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    >
+                                    
+                                    <button type="button" wire:click="incrementQty({{ $index }})" class="w-8 h-8 flex items-center justify-center bg-indigo-50 hover:bg-indigo-100 rounded-full text-indigo-600 font-black transition">
+                                        +
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-right font-bold">Rp{{ number_format($item['subtotal']) }}</td>
                             <td class="px-4 py-3 text-center">
-                                <button wire:click="removeFromCart({{ $index }})" class="text-red-500">x</button>
+                                <button type="button" wire:click="removeFromCart({{ $index }})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
                             </td>
                         </tr>
                         @endforeach
@@ -172,7 +292,7 @@ $saveTransaction = function ()  {
                     <span class="{{ $this->kembalian < 0 ? 'text-red-500' : 'text-green-600' }}">Rp{{ number_format($this->kembalian) }}</span>
                 </div>
 
-                    <button wire:click="saveTransaction" class="w-2/3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg transition">
+                    <button wire:click="saveTransaction" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg transition">
                         BAYAR
                     </button>          
             </div>
