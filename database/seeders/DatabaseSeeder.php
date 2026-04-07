@@ -30,33 +30,5 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password123'),
             'role' => 'kasir',
         ]);
-
-        // 2. Membuat Data Produk UMKM
-        Product::create([
-            'nama_produk' => 'Kopi Susu Gula Aren',
-            'kode_produk' => 'KOP-001',
-            'harga_beli' => 10000, // Modal
-            'harga_jual' => 18000, // Harga jual ke pelanggan
-            'stok' => 50,
-            'kategori' => 'Minuman'
-        ]);
-
-        Product::create([
-            'nama_produk' => 'Cireng Bumbu Rujak',
-            'kode_produk' => 'CRG-001',
-            'harga_beli' => 8000,
-            'harga_jual' => 15000,
-            'stok' => 30,
-            'kategori' => 'Makanan'
-        ]);
-
-        Product::create([
-            'nama_produk' => 'Keripik Kentang Balado',
-            'kode_produk' => 'KRP-001',
-            'harga_beli' => 5000,
-            'harga_jual' => 10000,
-            'stok' => 4, // Sengaja diset rendah (di bawah 5) untuk menguji fitur Auto-Alert nanti
-            'kategori' => 'Camilan'
-        ]);
     }
 }

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
 class Sale extends Model
 {
+    use Auditable;
     protected $fillable = ['invoice_number', 'total_price', 'pembayaran', 'kembalian', 'user_id', 'customer_id'];
 
     // Relasi ke Kasir
