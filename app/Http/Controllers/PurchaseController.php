@@ -43,7 +43,7 @@ class PurchaseController extends Controller
                 'purchase_number'=>$validated['purchase_number'],
                 'purchase_date'=>$validated['purchase_date'],
                 'total_cost'=>0,
-                'user_id'=>FacadesAuth::id(),
+                'user_id'=>FacadesAuth::id()??1,
             ]);
 
             $total=0;
