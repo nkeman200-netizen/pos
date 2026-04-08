@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreSaleRequest;
+use App\Http\Requests\UpdateSaleRequest;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
@@ -34,26 +36,23 @@ class SaleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) //tangkep form post
+    public function store(StoreSaleRequest $storeSaleRequest) //tangkep form post
     {
-        $request->validate([ //validasi dikit
-            'items'=>'required|array',
-            'pembayaran'=>'required|numeric',
-        ]);
+        $request=$storeSaleRequest->validated();
 
         return DB::transaction(function () use ($request){ //pake transaction untuk keamanan, gagal ditengah, gagal semua
             //1. TABEL UTAMA
             $sale=Sale::create([
                 'invoice_number'=>'INV-'. date('YmdHis'),
-                'customer_id'=>$request->customer_id,
-                'user_id'=>Auth::id()??1, //ambil otomatis dari user login
+                'customer_id'=>$request['customer_id'],
+                'user_id'=>Auth::id(), //ambil otomatis dari user login
                 'total_price'=>0, //kosongin dulu
-                'pembayaran'=>$request->pembayaran,
+                'pembayaran'=>$request['pembayaran'],
                 'kembalian'=>0
             ]);
             $total = 0;
             //2. TABEL DETAIL & OTOMATISASI STOK
-            foreach ($request->items as $item) { //ambil satu satu produc yang dibeli
+            foreach ($request['items'] as $item) { //ambil satu satu produc yang dibeli
                 $product=Product::findOrFail($item['product_id']); //tangkep, ambil objeknya
                 if ($product->stock < $item['quantity']) { //cek apakah stoknya cukup sesuai jumlah pembelian
                     throw new \Exception("Stok {$product->name} tidak cukup!"); //pake petik dua, biar bisa baca variabel
@@ -72,7 +71,7 @@ class SaleController extends Controller
             //3. UPDATE TABEL UTAMA
             $sale->update([ //yang tadi masih dikosongin, diisi di sini
                 'total_price'=>$total,
-                'kembalian'=>($request->pembayaran)-$total
+                'kembalian'=>($request['pembayaran'])-$total
             ]);
 
             return redirect()->route('sales.index')->with('success','Pembelian berhasil');
@@ -99,13 +98,10 @@ class SaleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Sale $sale)
+    public function update(UpdateSaleRequest $updateSaleRequest, Sale $sale)
     {
         // 1. VALIDASI DATA FORM POST
-        $request->validate([
-            'items'=>'required|array',
-            'pembayaran'=>'required|numeric',
-        ]);
+        $request=$updateSaleRequest->validated();
         // 2. FUNGSI TRANSACTION: KEAMANAN
         return DB::transaction(function () use ($request,$sale){
 
@@ -119,7 +115,7 @@ class SaleController extends Controller
             
             $total = 0;
             //3. SIMPAN BARU TABEL DETAIL & OTOMATISASI STOK
-            foreach ($request->items as $item) { //request form post yang dikirim
+            foreach ($request['items'] as $item) { //request form post yang dikirim
                 $product=Product::findOrFail($item['product_id']); //ambil id produk, cari objeknya
                 if ($product->stock < $item['quantity']) { //cek apakah stoknya cukup
                     throw new \Exception("Stok {$product->name} tidak cukup untuk update!"); //pake petik dua, biar bisa baca variabel
@@ -137,10 +133,10 @@ class SaleController extends Controller
             }
             //4. UPDATE TABEL UTAMA
             $sale->update([
-                'customer_id' => $request->customer_id,
-                'pembayaran'=>$request->pembayaran,
-                'total_price'=>$total,
-                'kembalian'=>($request->pembayaran)-$total
+                'customer_id' => $request['customer_id'], // Gaya ARRAY []
+                'total_price' => $total,
+                'pembayaran'  => $request['pembayaran'],
+                'kembalian'   => $request['pembayaran'] - $total
             ]);
 
             return redirect()->route('sales.index')->with('success','Berhasil diupdate');
@@ -153,7 +149,12 @@ class SaleController extends Controller
      */
     public function destroy(Sale $sale)
     {
-        $sale->delete();//hapus objeknya
+        DB::transaction(function() use ($sale) {
+            foreach ($sale->details as $item) {
+                $item->product->increment('stock',$item->quantity); 
+            };
+            $sale->delete();
+            } );
         return redirect()->route('sales.index')->with('success','Behasil dihapus');
     }
 }
