@@ -17,8 +17,8 @@ class PurchaseController extends Controller
      */
     public function index()
     {
-        $purchase=Purchase::latest()->paginate(10);
-        return view('purchases.index',compact('purchase'));
+        $purchases=Purchase::latest()->paginate(10);
+        return view('purchases.index',compact('purchases'));
     }
 
     /**
@@ -81,7 +81,8 @@ class PurchaseController extends Controller
     public function edit(Purchase $purchase)
     {
         $product=Product::all();
-        return view('purchases.edit',compact('product','purchase'));
+        $supplier=Supplier::all();
+        return view('purchases.edit',compact('product','purchase','supplier'));
         
     }
 

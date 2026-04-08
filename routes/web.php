@@ -14,6 +14,6 @@ Route::resource('customers', CustomerController::class);
 
 Route::resource('sales', SaleController::class);
 
-Route::resource('purchase', PurchaseController::class);
+Route::resource('purchases', PurchaseController::class);
 
 Route::get('sales/edit', [SaleController::class,'edit'])->name('sales.edit');

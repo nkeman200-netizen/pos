@@ -30,6 +30,10 @@
                 <a href="{{ route('sales.index') }}" class="flex items-center gap-2 p-2 {{ request()->routeIs('sales.*')?"bg-indigo-800" : "hover:bg-indigo-600" }} rounded transition">
                     <i data-lucide="badge-dollar-sign"></i> Sales
                 </a>
+                <a href="{{ route('purchases.index') }}" 
+                class="flex items-center gap-2 p-2 {{ request()->routeIs('purchases.*') ? 'bg-indigo-800' : ' hover:bg-indigo-600' }} rounded transition">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i> Stok Masuk
+                </a>
             </nav>
         </aside>
 

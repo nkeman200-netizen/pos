@@ -18,7 +18,7 @@ class Purchase extends Model
         'user_id',
         'total_cost',
     ];
-    protected $with = ['supplier', 'user','purchaseItem'];
+    protected $with = ['supplier', 'user','details'];
     public function details(){
         return $this->hasMany(PurchaseItem::class);
     }
