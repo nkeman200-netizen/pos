@@ -11,7 +11,7 @@
 
     <form action="{{ route('purchases.store') }}" method="POST">
         @csrf
-        @include('purchases._form')
+        <livewire:purchase-form />
 
         <div class="mt-6 flex justify-end">
             <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-3 rounded-xl font-bold shadow-lg transition">

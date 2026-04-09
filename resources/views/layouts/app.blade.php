@@ -60,7 +60,7 @@
 
             <!-- Isi Konten dari Halaman Lain -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                @yield('content')
+                {{ $slot }}
             </div>
         </main>
     </div>
