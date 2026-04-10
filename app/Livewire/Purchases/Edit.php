@@ -6,10 +6,14 @@ use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\Supplier;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
 class Edit extends Component
 {
+    #[Layout('layouts.app')]
+    #[Title('Edit pembelian')]
     public $purchasesId,$supplier_id,$purchase_number,$purchase_date,$total_cost,$user_id;
     public $items=[];
     function mount($id){

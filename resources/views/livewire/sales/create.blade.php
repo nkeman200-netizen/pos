@@ -111,7 +111,7 @@
                                     <input 
                                         type="number" 
                                         {{-- 1. Menyimpan data secara 'deferred' (ditahan dulu, tidak langsung dikirim ke server) --}}
-                                        wire:model="cart.{{ $index }}.quantity"
+                                        wire:model.live="cart.{{ $index }}.quantity"
                                         
                                         {{-- 2. Memaksa memanggil method syncCart setelah user berhenti ngetik selama 500ms --}}
                                         wire:input.debounce.300ms="syncCart({{ $index }})"
@@ -148,7 +148,7 @@
             <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-4">
                 <select wire:model="customerId" class="w-full p-3 border rounded-xl">
                     <option value="">Umum</option>
-                    @foreach(App\Models\Customer::all() as $c)
+                    @foreach($customers as $c)
                         <option value="{{ $c->id }}">{{ $c->name }}</option>
                     @endforeach
                 </select>

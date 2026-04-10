@@ -41,7 +41,9 @@
         <main class="flex-1 p-8">
             <!-- Header Halaman -->
             <header class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-semibold text-gray-700">@yield('title')</h2>
+                <header class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-semibold text-gray-700">{{ $title ?? 'Dashboard' }}</h2>
+                </header>
                 <div class="flex items-center gap-4">
                     <span class="text-sm text-gray-500 italic">Halo, Admin Sofya!</span>
                     <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold border-2 border-indigo-200">

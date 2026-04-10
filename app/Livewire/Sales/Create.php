@@ -7,10 +7,14 @@ use App\Models\Product;
 use App\Models\Sale;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
 class Create extends Component
 {
+    #[Layout('layouts.app')]
+    #[Title('Kasir')]
     // 1. STATE -> Menjadi Public Properties
     public $cart = [];
     public $customerId = '';
@@ -133,7 +137,7 @@ class Create extends Component
                 $sale->details()->create([
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
-                    'selling_price' => $item['unit_price'], // Pastikan nama kolom sesuai tabel sale_items
+                    'unit_price' => $item['unit_price'], // Pastikan nama kolom sesuai tabel sale_items
                     'subtotal' => $item['subtotal']
                 ]);
                 Product::find($item['product_id'])->decrement('stock', $item['quantity']);

@@ -2,12 +2,16 @@
 namespace App\Livewire\Purchases;
 
 use App\Models\Purchase;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class Index extends Component
 {
     use WithPagination;
+    #[Layout('layouts.app')]
+    #[Title('Daftar pembelian')]
 
     public $search = '';
 

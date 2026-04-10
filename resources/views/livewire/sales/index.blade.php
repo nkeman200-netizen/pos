@@ -54,7 +54,7 @@
                                 <i data-lucide="eye" class="w-4 h-4"></i>
                             </a>
 
-                            <a href="{{ route('sales.edit', $sale) }}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit Transaksi">
+                            <a href="{{ route('sales.edit', $sale->id)}}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit Transaksi">
                                 <i data-lucide="edit-3" class="w-4 h-4"></i>
                             </a>
                             

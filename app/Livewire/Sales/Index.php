@@ -3,12 +3,17 @@
 namespace App\Livewire\Sales;
 
 use App\Models\Sale;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class Index extends Component
 {
     use WithPagination;
+    #[Layout('layouts.app')]
+    #[Title('Daftar penjualan')]
+    
     public $search='';
 
     function updatingSearch(){

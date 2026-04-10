@@ -3,10 +3,14 @@ namespace App\Livewire\Purchases;
 
 use App\Models\{Purchase, Product, Supplier};
 use Illuminate\Support\Facades\{DB, Auth};
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
 class Create extends Component
 {
+    #[Layout('layouts.app')]
+    #[Title('Pembelian baru')]
     public $supplier_id, $purchase_number, $purchase_date;
     public $items = []; // Ini rahasia "sat-set" kita
 
