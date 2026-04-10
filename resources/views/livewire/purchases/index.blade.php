@@ -28,9 +28,19 @@
                     <td class="px-4 py-4">{{ $p->supplier->name }}</td>
                     <td class="px-4 py-4 text-right font-bold">Rp{{ number_format($p->total_cost) }}</td>
                     <td class="px-4 py-4 text-center">
-                        <button wire:click="delete({{ $p->id }})" wire:confirm="Hapus data ini? Stok akan berkurang otomatis." class="text-red-500">
-                            Hapus
-                        </button>
+                        <div class="flex justify-center items-center gap-3">
+                            <a href="{{ route('purchases.show', $p->id) }}" class="text-blue-500 hover:text-blue-700 tooltip" title="Lihat Detail">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </a>
+                            
+                            <a href="{{ route('purchases.edit', $p->id) }}" class="text-amber-500 hover:text-amber-700 tooltip" title="Edit Faktur">
+                                <i data-lucide="edit" class="w-5 h-5"></i>
+                            </a>
+
+                            <button wire:click="delete({{ $p->id }})" wire:confirm="Hapus data ini? Stok obat akan otomatis dikurangi kembali." class="text-red-500 hover:text-red-700" title="Hapus Data">
+                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 @endforeach

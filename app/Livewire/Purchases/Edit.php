@@ -47,12 +47,12 @@ class Edit extends Component
     {
         $this->validate([
             'supplier_id' => 'required',
-            'purchase_number' => 'required|unique:purchases,purchase_number,'.$this->purchaseId,
+            'purchase_number' => 'required|unique:purchases,purchase_number,'.$this->purchasesId,
             'items.*.product_id' => 'required',
         ]);
 
         DB::transaction(function () {
-            $purchase = Purchase::findOrFail($this->purchaseId);
+            $purchase = Purchase::findOrFail($this->purchasesId);
 
             // 1. REVERT STOK LAMA (Decrement)
             foreach ($purchase->details as $oldItem) {

@@ -13,6 +13,15 @@ class Create extends Component
     public function mount()
     {
         $this->purchase_date = date('Y-m-d');
+
+        // AUTO-GENERATE NOMOR FAKTUR
+        // Format: PUR-YYYYMMDD-0001
+        $today = date('Ymd'); 
+        $latestPurchase = Purchase::latest()->first();
+        $nextId = $latestPurchase ? $latestPurchase->id + 1 : 1;
+        
+        $this->purchase_number = 'PUR-' . $today . '-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+        
         // Mulai dengan satu baris kosong
         $this->items[] = ['product_id' => '', 'quantity' => 1, 'cost_price' => 0];
     }
