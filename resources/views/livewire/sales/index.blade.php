@@ -54,17 +54,13 @@
                                 <i data-lucide="eye" class="w-4 h-4"></i>
                             </a>
 
-                            <a href="{{ route('sales.edit', $sale->id)}}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit Transaksi">
+                            <a href="{{ route('sales.edit', $sale)}}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit Transaksi">
                                 <i data-lucide="edit-3" class="w-4 h-4"></i>
                             </a>
                             
-                            <form action="{{ route('sales.destroy', $sale) }}" method="POST" onsubmit="return confirm('Peringatan: Menghapus transaksi ini akan mengembalikan stok barang ke gudang. Lanjutkan?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Batalkan Transaksi">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </form>
+                            <button wire:click="delete({{$sale->id}})" wire:confirm="Hapus data ini? Stok obat akan otomatis dikurangi kembali." class="text-red-500 hover:text-red-700" title="Hapus Data">
+                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>

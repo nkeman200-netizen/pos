@@ -14,9 +14,11 @@ class Edit extends Component
 {
     #[Layout('layouts.app')]
     #[Title('Edit sale')]
-    public $sale_id,$invoice_number,$cart=[],$customerId,$pembayaran,$selectedProductId,$qty=1,$stokLama=[],$searchQuery;
+    public $sale_id,$invoice_number,$cart=[],$customerId,$pembayaran,$selectedProductId,$qty=1,$stokLama=[];
+    public $searchQuery='';
 
-    public function mount(Sale $sale){
+    public function mount($id){
+        $sale = Sale::with('details.product')->findOrFail($id);
         $this->sale_id = $sale->id; //isi state
         $this->invoice_number = $sale->invoice_number;
         $this->customerId = $sale->customer_id;
@@ -39,10 +41,10 @@ class Edit extends Component
         }
     }
     
-    function getPembayaranMurniProperty(){
+    public function getPembayaranMurniProperty(){
         return (int) preg_replace('/[^0-9]/', '', (string)$this->pembayaran);
     }
-    function getTotalProperty(){
+    public function getTotalProperty(){
         return collect($this->cart)->sum('subtotal');
     }
 
@@ -50,8 +52,8 @@ class Edit extends Component
         return $this->pembayaranMurni - $this->total;
     }
 
-    function getSearchResultsProperty(){
-        if(strlen(($this->searchQuery)>2)) return collect();
+    public function getSearchResultsProperty(){
+        if(strlen($this->searchQuery)<2) return collect();
         return Product::where('name','like','%'.$this->searchQuery.'%')->take(5)->get();
     }
     
@@ -61,9 +63,16 @@ class Edit extends Component
 
         $product = Product::find($idProduct); 
         if ($product->stock < $this->qty) return session()->flash('error', 'Stok tidak cukup!');
+        if (!$product) return; // Guard tambahan kalau produk tidak ketemu
 
-        $index = collect($this->cart)->search(fn($item) => $item['product_id'] == $product->id);
-
+        // Cari manual pakai foreach (Lebih aman dari bug scope Collection)
+        $index = false;
+        foreach ($this->cart as $key => $item) {
+            if ($item['product_id'] == $product->id) {
+                $index = $key;
+                break;
+            }
+        }
         if ($index !== false) {
             $this->cart[$index]['quantity'] += (int)$this->qty;
             $this->cart[$index]['subtotal'] = $this->cart[$index]['quantity'] * $this->cart[$index]['unit_price'];
@@ -126,27 +135,34 @@ class Edit extends Component
         return redirect()->route('sales.index')->with('success', 'Transaksi Berhasil Diupdate!');
     }
     
-    function syncCart($index)
+    public function syncCart($index)
     {
         $item = $this->cart[$index];
         $qty = (int) $item['quantity'];
         
-        // 1. Minimal 1
         if ($qty < 1) $qty = 1;
 
-        // 2. Cek Stok (Logika Edit vs Create)
         $product = Product::find($item['product_id']);
         
-        // Jika di halaman EDIT, gunakan stokLama sebagai tambahan
-        $stokAwal = isset($this->stokLama) ? ($this->stokLama[$product->id] ?? 0) : 0;
-        $stokTersedia = $product->stock + $stokAwal;
+        // HITUNG STOK AMAN:
+        // Stok Aman = Stok di Etalase (Database) + Stok barang INI yang sudah terlanjur masuk faktur lama
+        // Gunakan array_search untuk mencari QTY lama dari database (Bukan dari Livewire State)
+        $sale = Sale::with('details')->find($this->sale_id);
+        $qtyLama = 0;
+        if ($sale) {
+            $detailLama = $sale->details->where('product_id', $product->id)->first();
+            if ($detailLama) {
+                $qtyLama = $detailLama->quantity;
+            }
+        }
+
+        $stokTersedia = $product->stock + $qtyLama;
 
         if ($qty > $stokTersedia) {
             $qty = $stokTersedia;
-            session()->flash('error', "Stok {$product->name} tidak cukup!");
+            session()->flash('error', "Stok {$product->name} tidak cukup! Maksimal: {$stokTersedia}");
         }
 
-        // 3. Update data di array cart
         $this->cart[$index]['quantity'] = $qty;
         $this->cart[$index]['subtotal'] = $qty * $item['unit_price'];
     }

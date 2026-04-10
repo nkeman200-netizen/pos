@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateSaleRequest;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 

@@ -1,7 +1,7 @@
 <div class="p-6 bg-white rounded-2xl shadow-sm">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">Riwayat Stok Masuk</h2>
-        <a href="{{ route('purchases.create') }}" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold">
+        <p class="text-gray-500">Kelola dan lihat riwayat stok masuk</p>
+        <a href="{{ route('purchases.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition shadow-md">
             + Tambah Stok
         </a>
     </div>
@@ -21,23 +21,22 @@
                     <th class="px-4 py-4 text-center">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-gray-100 text-sm">
                 @foreach($purchases as $p)
                 <tr>
                     <td class="px-4 py-4 font-bold text-indigo-600">{{ $p->purchase_number }}</td>
                     <td class="px-4 py-4">{{ $p->supplier->name }}</td>
                     <td class="px-4 py-4 text-right font-bold">Rp{{ number_format($p->total_cost) }}</td>
                     <td class="px-4 py-4 text-center">
-                        <div class="flex justify-center items-center gap-3">
-                            <a href="{{ route('purchases.show', $p->id) }}" class="text-blue-500 hover:text-blue-700 tooltip" title="Lihat Detail">
+                        <div class="flex justify-center items-center gap-2">
+                            <a href="{{ route('purchases.show', $p->id) }}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Lihat Detail">
                                 <i data-lucide="eye" class="w-5 h-5"></i>
                             </a>
                             
-                            <a href="{{ route('purchases.edit', $p->id) }}" class="text-amber-500 hover:text-amber-700 tooltip" title="Edit Faktur">
-                                <i data-lucide="edit" class="w-5 h-5"></i>
+                            <a href="{{ route('purchases.edit', $p) }}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
                             </a>
-
-                            <button wire:click="delete({{ $p->id }})" wire:confirm="Hapus data ini? Stok obat akan otomatis dikurangi kembali." class="text-red-500 hover:text-red-700" title="Hapus Data">
+                            <button wire:click="delete({{ $p->id }})" wire:confirm="Hapus data ini? Stok obat akan otomatis dikurangi kembali." class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus Data">
                                 <i data-lucide="trash-2" class="w-5 h-5"></i>
                             </button>
                         </div>
