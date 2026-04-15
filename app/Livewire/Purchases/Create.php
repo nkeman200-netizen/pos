@@ -32,7 +32,13 @@ class Create extends Component
 
     public function addItem()
     {
-        $this->items[] = ['product_id' => '', 'quantity' => 1, 'cost_price' => 0];
+        $this->items[] = [
+            'product_id' => '',
+            'quantity' => 1,
+            'purchase_price' => 0,
+            'batch_number' => '', // Tambahkan ini
+            'expired_date' => ''  // Tambahkan ini
+        ];
     }
 
     public function removeItem($index)
@@ -51,7 +57,7 @@ class Create extends Component
         });
     }
 
-    public function save()
+    public function saveTransaction()
     {
         $this->validate([
             'supplier_id' => 'required',

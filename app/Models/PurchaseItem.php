@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class PurchaseItem extends Model
 {
     use Auditable;
-    protected $fillable = ['purchase_id','product_id','quantity','cost_price','subtotal'];
+    protected $fillable = ['purchase_id','product_id','quantity','purchase_price','subtotal'];
 
     public function purchase(){
         return $this->belongsTo(Purchase::class);

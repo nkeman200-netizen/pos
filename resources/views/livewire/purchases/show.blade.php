@@ -37,7 +37,7 @@
             <tr>
                 <td class="px-4 py-4 font-medium">{{ $item->product->name }}</td>
                 <td class="px-4 py-4 text-center">{{ $item->quantity }}</td>
-                <td class="px-4 py-4 text-right">Rp{{ number_format($item->cost_price) }}</td>
+                <td class="px-4 py-4 text-right">Rp{{ number_format($item->purchase_price) }}</td>
                 <td class="px-4 py-4 text-right font-bold">Rp{{ number_format($item->subtotal) }}</td>
             </tr>
             @endforeach

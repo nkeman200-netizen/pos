@@ -20,14 +20,6 @@ class Index extends Component
         $this->resetPage();
     }
     
-    function delete($id){
-        $sale=Sale::findOrFail($id);
-        foreach ($sale->details as $detail) {
-            $detail->product->increment('stock',$detail->quantity);
-        }
-        $sale->delete();
-        session()->flash('success','data telah dihapus');
-    }
     
     public function render()
     {

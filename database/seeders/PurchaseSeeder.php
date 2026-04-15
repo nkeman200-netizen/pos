@@ -34,7 +34,7 @@ class PurchaseSeeder extends Seeder
             $purchase->details()->create([
                 'product_id' => $product->id,
                 'quantity' => $qty,
-                'cost_price' => $costPrice,
+                'purchase_price' => $costPrice,
                 'subtotal' => $subtotal
             ]);
 

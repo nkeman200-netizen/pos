@@ -4,6 +4,7 @@ namespace App\Livewire\Sales;
 
 use App\Models\Customer;
 use App\Models\Product;
+use App\Models\ProductBatch;
 use App\Models\Sale;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,14 +40,15 @@ class Create extends Component
         return $this->pembayaranMurni - $this->total;
     }
 
-    public function getSearchResultsProperty() 
+    // Fitur pencarian otomatis
+    public function getSearchResultsProperty()
     {
-        if (strlen($this->searchQuery) < 2) return collect(); 
-        
-        return Product::where('name', 'like', '%' . $this->searchQuery . '%')
-                        ->where('stock', '>', 0)
-                        ->take(5)
-                        ->get();
+        if (strlen($this->searchQuery) < 2) return collect();
+        return Product::with('unit')
+            ->where('name', 'like', '%' . $this->searchQuery . '%')
+            ->orWhere('sku', 'like', '%' . $this->searchQuery . '%')
+            ->where('is_active', true)
+            ->take(5)->get();
     }
 
     // 3. ACTIONS -> Menjadi Public Functions
@@ -55,18 +57,24 @@ class Create extends Component
         if (!$idProduct) return; 
 
         $product = Product::find($idProduct); 
+        if (!$product){
+            session()->flash('error','Data product tidak ditemukan');return;
+        };
         $index = collect($this->cart)->search(fn($item) => $item['product_id'] == $product->id); 
         $totalQty = ($index !== false ? $this->cart[$index]['quantity'] : 0) + 1; 
         
-        if ($product->stock < $totalQty) { 
-            session()->flash('error', 'Stok ' . $product->name . ' tidak cukup! Tersisa: ' . $product->stock);
-            return; 
-        }
-
+        
         if ($index !== false) { 
+            if ($product->stock < $totalQty) { 
+                session()->flash('error', 'Stok ' . $product->name . ' tidak cukup! Tersisa: ' . $product->stock);
+                return; 
+            }
             $this->cart[$index]['quantity'] += (int)$this->qty;   
             $this->cart[$index]['subtotal'] = $this->cart[$index]['quantity'] * $this->cart[$index]['unit_price'];
         } else {
+            if ($product->stock <1) {
+                session()->flash('error','Stok product habis');return;
+            };
             $this->cart[] = [
                 'product_id' => $product->id,
                 'name' => $product->name,
@@ -118,34 +126,71 @@ class Create extends Component
 
     public function saveTransaction()  
     {
+        // Flash Session cocok ditaruh di sini (sebelum DB::transaction)
+        // karena hanya memvalidasi inputan form dari kasir
         if (empty($this->cart) || $this->pembayaranMurni < $this->total) {
             session()->flash('error', 'Pastikan keranjang tidak kosong dan pembayaran mencukupi!');
             return;
         }
 
-        DB::transaction(function ()  { 
-            $sale = Sale::create([
-                'invoice_number' => 'INV-' . date('YmdHis'),
-                'customer_id'    => $this->customerId ?: null,
-                'user_id'        => Auth::id() ?? 1, 
-                'total_price'    => $this->total, 
-                'pembayaran'     => $this->pembayaranMurni, 
-                'kembalian'      => $this->kembalian 
-            ]);
-
-            foreach ($this->cart as $item) { 
-                $sale->details()->create([
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price'], // Pastikan nama kolom sesuai tabel sale_items
-                    'subtotal' => $item['subtotal']
+        try {
+            // Mulai Transaksi Database
+            DB::transaction(function ()  { 
+                
+                // 1. Simpan Sale (Invoice digenerate persis di detik ini!)
+                $sale = Sale::create([
+                    'invoice_number' => 'INV-' . date('YmdHis'),
+                    'customer_id'    => $this->customerId ?: null,
+                    'user_id'        => Auth::id() ?? 1, 
+                    'total_price'    => $this->total, 
+                    'pembayaran'     => $this->pembayaranMurni, 
+                    'kembalian'      => $this->kembalian 
                 ]);
-                Product::find($item['product_id'])->decrement('stock', $item['quantity']);
-            }
-        });
 
-        session()->flash('success', 'Transaksi Lunas!');
-        return redirect()->route('sales.index');
+                foreach ($this->cart as $item) { 
+                    // 2. Simpan Sale Items
+                    $sale->details()->create([
+                        'product_id' => $item['product_id'],
+                        'quantity' => $item['quantity'],
+                        'unit_price' => $item['unit_price'], 
+                        'subtotal' => $item['subtotal']
+                    ]);
+                    
+                    // 3. Algoritma FEFO
+                    $qtyDibutuhkan = $item['quantity'];
+
+                    $batches = ProductBatch::where('product_id', $item['product_id'])
+                        ->where('stock', '>', 0)
+                        ->where('expired_date', '>=', now())
+                        ->orderBy('expired_date', 'asc')
+                        ->lockForUpdate() // Kunci row ini agar tidak dicolong kasir lain saat bersamaan!
+                        ->get();
+
+                    foreach ($batches as $batch) {
+                        if ($qtyDibutuhkan <= 0) break;
+
+                        if ($batch->stock >= $qtyDibutuhkan) {
+                            $batch->decrement('stock', $qtyDibutuhkan);
+                            $qtyDibutuhkan = 0; 
+                        } else {
+                            $qtyDibutuhkan -= $batch->stock; 
+                            $batch->update(['stock' => 0]); 
+                        }
+                    }
+                    // REM DARURAT! Kalau setelah ngecek semua batch ternyata stok masih kurang
+                    if ($qtyDibutuhkan > 0) {
+                        // Exception ini akan membatalkan SEMUA perintah create() di atas secara otomatis!
+                        throw new \Exception("Gagal! Stok {$item['name']} ternyata kurang saat diproses.");
+                    }
+                }   
+            });
+            // Kalau lolos dari DB::transaction tanpa Exception, berarti sukses!
+            session()->flash('success', 'Transaksi Lunas!');
+            return redirect()->route('sales.index');
+        } catch (\Exception $e) {
+            // Tangkap pesan Exception di atas, dan tampilkan ke layar kasir pakai Flash
+            session()->flash('error', $e->getMessage());
+        }
     }
 
     public function render()

@@ -1,8 +1,14 @@
 <div class="p-8">
-    <div class="mb-6">
-        <a href="{{ route('customers.index') }}" wire:ignore class="text-gray-500 hover:text-indigo-600 flex items-center gap-1 transition">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Daftar
-        </a>
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-4">
+            <a href="{{ route('customers.index') }}" class="p-2.5 bg-white text-gray-500 hover:text-indigo-600 rounded-xl shadow-sm border border-gray-100 hover:border-indigo-100 transition-all">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </a>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Edit Data Pelanggan</h2>
+                <p class="text-sm text-gray-500">Form edit profil pelanggan</p>
+            </div>
+        </div>
     </div>
 
     <div class="max-w-2xl mx-auto bg-white border border-gray-100 shadow-xl rounded-2xl overflow-hidden">

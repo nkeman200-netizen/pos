@@ -10,7 +10,7 @@ use Livewire\Component;
 class Create extends Component
 {
     #[Layout('layouts.app')]
-    #[Title('Tambah Data Pelanggan')] // Typo 'palanggan' diperbaiki
+    #[Title('Pelanggan Baru')] // Typo 'palanggan' diperbaiki
 
     public $name, $phone, $address;
 

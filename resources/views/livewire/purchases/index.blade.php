@@ -33,12 +33,6 @@
                                 <i data-lucide="eye" class="w-5 h-5"></i>
                             </a>
                             
-                            <a href="{{ route('purchases.edit', $p) }}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
-                                <i data-lucide="edit-3" class="w-4 h-4"></i>
-                            </a>
-                            <button wire:click="delete({{ $p->id }})" wire:confirm="Hapus data ini? Stok obat akan otomatis dikurangi kembali." class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus Data">
-                                <i data-lucide="trash-2" class="w-5 h-5"></i>
-                            </button>
                         </div>
                     </td>
                 </tr>

@@ -52,12 +52,12 @@ class PurchaseController extends Controller
                 $purchase->details()->create([
                     'product_id'=>$item['product_id'],
                     'quantity'=>$item['quantity'],
-                    'cost_price'=>$item['cost_price'],
-                    'subtotal'=>$item['cost_price']*$item['quantity']
+                    'purchase_price'=>$item['purchase_price'],
+                    'subtotal'=>$item['purchase_price']*$item['quantity']
                 ]);
 
                 $product->increment('stock',$item['quantity']);
-                $total+=$item['cost_price']*$item['quantity'];
+                $total+=$item['purchase_price']*$item['quantity'];
             }
 
             $purchase->update(['total_cost'=>$total]);
@@ -103,12 +103,12 @@ class PurchaseController extends Controller
                 $purchase->details()->create([
                     'product_id'=>$item['product_id'],
                     'quantity'=>$item['quantity'],
-                    'cost_price'=>$item['cost_price'],
-                    'subtotal'=>$item['cost_price']*$item['quantity']
+                    'purchase_price'=>$item['purchase_price'],
+                    'subtotal'=>$item['purchase_price']*$item['quantity']
                 ]);
 
                 Product::findOrFail($item['product_id'])->increment('stock',$item['quantity']);
-                $total+=$item['cost_price']*$item['quantity'];
+                $total+=$item['purchase_price']*$item['quantity'];
             }
             $purchase->update([
                 'total_cost'=>$total

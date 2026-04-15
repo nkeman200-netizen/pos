@@ -53,14 +53,6 @@
                             <a href="{{ route('sales.show', $sale) }}" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Lihat Struk">
                                 <i data-lucide="eye" class="w-4 h-4"></i>
                             </a>
-
-                            <a href="{{ route('sales.edit', $sale)}}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit Transaksi">
-                                <i data-lucide="edit-3" class="w-4 h-4"></i>
-                            </a>
-                            
-                            <button wire:click="delete({{$sale->id}})" wire:confirm="Hapus data ini? Stok obat akan otomatis dikurangi kembali." class="text-red-500 hover:text-red-700" title="Hapus Data">
-                                <i data-lucide="trash-2" class="w-5 h-5"></i>
-                            </button>
                         </div>
                     </td>
                 </tr>

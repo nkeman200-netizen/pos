@@ -21,19 +21,6 @@ class Index extends Component
         $this->resetPage();
     }
 
-    public function delete($id)
-    {
-        $purchase = Purchase::findOrFail($id);
-        
-        // Logika decrement stok saat purchase dihapus
-        foreach ($purchase->details as $item) {
-            $item->product->decrement('stock', $item->quantity);
-        }
-        
-        $purchase->delete(); // Ini otomatis memicu Auditable Trait
-        session()->flash('success', 'Data berhasil dihapus dan stok dikoreksi.');
-    }
-
     public function render()
     {
         $purchases = Purchase::with(['supplier', 'user'])
