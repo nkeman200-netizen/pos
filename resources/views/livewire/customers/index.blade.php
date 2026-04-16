@@ -11,7 +11,7 @@
                 class="w-full md:w-64 p-2 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500">
         </div>
         
-        <div class="overflow-x-auto bg-white rounded-xl border border-gray-100 shadow-sm">
+        <div class="overflow-x-auto bg-white dark:bg-slate-800 rounded-xl border border-gray-100 shadow-sm">
             <table class="w-full text-left">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-100">

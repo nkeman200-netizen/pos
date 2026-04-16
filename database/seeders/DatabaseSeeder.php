@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductBatch;
+use App\Models\Supplier;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -20,6 +21,13 @@ class DatabaseSeeder extends Seeder
             ['password' => Hash::make('password'), 'role' => 'admin']
         );
 
+        $supplier=[['name'=>'akwafkw'],
+            ['address'=>'cilacap'],
+            ['phone'=>'0888024242']];
+        Supplier::firstOrCreate(
+            $supplier
+        );
+        
         // 2. Master Data: Kategori (Golongan Obat)
         $categories = [
             ['name' => 'Obat Bebas'],

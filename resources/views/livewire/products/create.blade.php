@@ -1,7 +1,7 @@
 <div class="p-6 lg:p-8 bg-gray-50 min-h-screen">
     <div class="flex items-center justify-between mb-8">
         <div class="flex items-center gap-4">
-            <a href="{{ route('products.index') }}" class="p-2.5 bg-white text-gray-500 hover:text-indigo-600 rounded-xl shadow-sm border border-gray-100 hover:border-indigo-100 transition-all">
+            <a href="{{ route('products.index') }}" class="p-2.5 bg-white dark:bg-slate-800 text-gray-500 hover:text-indigo-600 rounded-xl shadow-sm border border-gray-100 hover:border-indigo-100 transition-all">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </a>
             <div>
@@ -11,7 +11,7 @@
         </div>
     </div>
 
-    <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="max-w-3xl mx-auto bg-white  dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         
         <div class="bg-indigo-600 p-4 flex items-start gap-3">
             <i data-lucide="info" class="w-5 h-5 text-indigo-200 mt-0.5"></i>

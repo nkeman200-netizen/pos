@@ -1,7 +1,7 @@
 <div class="p-8">
     <div class="flex items-center justify-between mb-8">
         <div class="flex items-center gap-4">
-            <a href="{{ route('customers.index') }}" class="p-2.5 bg-white text-gray-500 hover:text-indigo-600 rounded-xl shadow-sm border border-gray-100 hover:border-indigo-100 transition-all">
+            <a href="{{ route('customers.index') }}" class="p-2.5 bg-white dark:bg-slate-800 text-gray-500 hover:text-indigo-600 rounded-xl shadow-sm border border-gray-100 hover:border-indigo-100 transition-all">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </a>
             <div>
@@ -11,7 +11,7 @@
         </div>
     </div>
 
-    <div class="max-w-2xl mx-auto bg-white border border-gray-100 shadow-xl rounded-2xl overflow-hidden">
+    <div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 border border-gray-100 shadow-xl rounded-2xl overflow-hidden">
         <div class="bg-indigo-600 p-4">
             <p class="text-indigo-100 text-sm font-medium">Lengkapi detail informasi pelanggan di bawah ini.</p>
         </div>

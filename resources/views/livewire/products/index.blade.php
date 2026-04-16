@@ -2,7 +2,7 @@
     
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-            <h2 class="text-2xl font-bold text-gray-800">Katalog Obat</h2>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Katalog Obat</h2>
             <p class="text-sm text-gray-500 mt-1">Kelola master data obat, harga, dan pantau total stok aktif.</p>
         </div>
         <a href="{{ route('products.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2 whitespace-nowrap">
@@ -23,9 +23,9 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         
-        <div class="p-5 border-b border-gray-100 bg-white flex flex-col sm:flex-row justify-between gap-4">
+        <div class="p-5 border-b border-gray-100 bg-white dark:bg-slate-800 flex flex-col sm:flex-row justify-between gap-4">
             <div class="relative w-full sm:w-96">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
@@ -58,7 +58,7 @@
                         </td>
                         
                         <td class="px-6 py-4">
-                            <div class="font-bold text-gray-800">{{ $product->name }}</div>
+                            <div class="font-bold text-gray-800 dark:text-gray-100">{{ $product->name }}</div>
                             <div class="text-xs text-gray-500 mt-0.5">Satuan: {{ $product->unit->name }}</div>
                         </td>
 
@@ -73,7 +73,7 @@
                         </td>
 
                         <td class="px-6 py-4 text-right">
-                            <span class="font-bold text-gray-800">Rp{{ number_format($product->selling_price) }}</span>
+                            <span class="font-bold text-gray-800 dark:text-gray-100">Rp{{ number_format($product->selling_price) }}</span>
                         </td>
 
                         <td class="px-6 py-4 text-center">

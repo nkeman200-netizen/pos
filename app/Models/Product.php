@@ -42,4 +42,5 @@ class Product extends Model
                     ->where('expired_date', '>=', now())
                     ->sum('stock');
     }
+    
 }
