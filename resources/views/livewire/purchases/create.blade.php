@@ -128,7 +128,15 @@
         </div>
 
         <div class="xl:col-span-1 space-y-6">
-            
+            <div class="mb-6 bg-indigo-50 dark:bg-indigo-500/10 p-4 rounded-xl border border-indigo-100 dark:border-indigo-500/20">
+                <label class="block text-sm font-bold text-indigo-800 dark:text-indigo-300 mb-2 tracking-wide">Tarik Data dari Purchase Order (Otomatis)</label>
+                <select wire:model.live="purchase_order_id" class="w-full p-3 bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-bold">
+                    <option value="">-- Ketik/Pilih Nomor PO --</option>
+                    @foreach($purchaseOrders as $po)
+                        <option value="{{ $po->id }}">{{ $po->po_number }} - {{ $po->supplier->name }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100">
                 <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Supplier / PBF *</label>
                 <div class="relative">

@@ -18,8 +18,12 @@ use App\Livewire\Products\Create as ProductCreate;
 use App\Livewire\Dashboard;
 use App\Livewire\Suppliers;
 use App\Livewire\PurchaseOrders;
-
+use App\Livewire\Customers;
+use App\Livewire\Categories;
+use App\Http\Controllers\PurchaseOrderController;
 Route::get('/', Dashboard::class)->name('dashboard');
+
+Route::get('/categories', Categories\Index::class)->name('categories.index');
 
 // Arahkan langsung ke Komponen Livewire
 Route::get('/purchases', PurchaseIndex::class)->name('purchases.index');
@@ -44,5 +48,15 @@ Route::get('/customers/{id}/edit', CustomerEdit::class)->name('customers.edit');
 Route::get('/suppliers', Suppliers\Index::class)->name('suppliers.index');
 Route::get('/suppliers/create', Suppliers\Create::class)->name('suppliers.create');
 Route::get('/suppliers/{id}/edit', Suppliers\Edit::class)->name('suppliers.edit');
+Route::get('/purchases/{id}/print', [App\Http\Controllers\PurchaseController::class, 'print'])->name('purchases.print');
 
+// --- MASTER DATA ---
+Route::get('/customers', Customers\Index::class)->name('customers.index');
+Route::get('/customers/create', Customers\Create::class)->name('customers.create');
+Route::get('/customers/{id}/edit', Customers\Edit::class)->name('customers.edit');
+
+// --- TRANSAKSI ---
+Route::get('/purchase-orders', PurchaseOrders\Index::class)->name('purchase-orders.index');
 Route::get('/purchase-orders/create', PurchaseOrders\Create::class)->name('purchase-orders.create');
+Route::get('/purchase-orders/{id}', PurchaseOrders\Show::class)->name('purchase-orders.show');
+Route::get('/purchase-orders/{id}/print', [PurchaseOrderController::class, 'print'])->name('purchase-orders.print');

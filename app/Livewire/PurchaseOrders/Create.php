@@ -46,7 +46,7 @@ class Create extends Component
         // 2. Filter menggunakan Collection (Lebih aman dari SQL Error)
         $produkKritis = $semuaObat->filter(function ($p) {
             // Masuk kategori kritis jika stok < 10, atau belum punya stok sama sekali (null)
-            return $p->batches_sum_stock < 10 || $p->batches_sum_stock === null;
+            return $p->batches_sum_stock <= 10 || $p->batches_sum_stock === null;
         });
 
         if($produkKritis->isEmpty()) {
@@ -158,7 +158,7 @@ class Create extends Component
             session()->flash('success', 'Surat Purchase Order (PO) berhasil dibuat!');
             // return redirect()->route('purchase-orders.index'); // Nanti kita buat rute ini
             $this->items = []; // Kosongkan sementara untuk testing
-            
+            return redirect()->route('purchase-orders.index');
         } catch (\Exception $e) {
             session()->flash('error', 'Gagal menyimpan PO: ' . $e->getMessage());
         }

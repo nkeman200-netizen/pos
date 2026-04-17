@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Purchases;
 
+use App\Imports\PurchaseTempImport; 
 use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\Purchase;
+use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +15,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads; // WAJIB DIPANGGIL
 use Maatwebsite\Excel\Facades\Excel; // WAJIB DIPANGGIL
-use App\Imports\PurchaseTempImport; 
+
 use function Symfony\Component\Clock\now;// WAJIB DIPANGGIL
 
 class Create extends Component
@@ -26,7 +28,13 @@ class Create extends Component
     public $supplier_id = '';
     public $searchQuery = ''; 
     public $excelFile;
+    public $purchase_order_id = ''; // Untuk nangkep ID PO
+    public $purchase_date = '';     // Tanggal terima fisik
 
+    public function mount()
+    {
+        $this->purchase_date = now()->format('Y-m-d');
+    }
     // Fitur pencarian otomatis persis seperti Sales
     public function getSearchResultsProperty()
     {
@@ -86,6 +94,33 @@ class Create extends Component
         $this->items[$index]['quantity'] = $qty;
         $this->items[$index]['subtotal'] = $qty * $price;
     }
+// FITUR UTAMA: Tarik Data PO Otomatis
+
+
+    public function updatedPurchaseOrderId($id)
+    {
+        if (!$id) return;
+
+        $po = PurchaseOrder::with(['items.product', 'supplier'])->find($id);
+        
+        if ($po) {
+            $this->supplier_id = $po->supplier_id;
+            $this->items = []; // Reset keranjang
+
+            foreach ($po->items as $item) {
+                $this->items[] = [
+                    'product_id' => $item->product_id,
+                    'name' => $item->product->name,
+                    'unit_name' => $item->product->unit->short_name ?? '',
+                    'quantity' => $item->quantity,
+                    'purchase_price' => $item->purchase_price,
+                    'batch_number' => '', 
+                    'expired_date' => '',  // <-- Sudah pakai expired_date sesuai DB kamu
+                    'subtotal' => $item->subtotal
+                ];
+            }
+        }
+    }
 
     public function saveTransaction()
     {
@@ -100,7 +135,6 @@ class Create extends Component
             return;
         }
 
-        // Validasi ekstra: Pastikan Batch, Exp Date, dan Harga Beli tidak kosong
         foreach ($this->items as $item) {
             if (empty($item['batch_number']) || empty($item['expired_date']) || $item['purchase_price'] <= 0) {
                 session()->flash('error', "Lengkapi Harga Beli, No. Batch, dan Expired Date untuk obat {$item['name']}!");
@@ -110,16 +144,17 @@ class Create extends Component
 
         try {
             DB::transaction(function () {
+                // 1. Simpan Header (Pakai total_cost sesuai fillable kamu)
                 $purchase = Purchase::create([
-                    'purchase_number' => 'PRC-' . date('YmdHis'), // Auto generate
-                    'purchase_date'=>now(),
+                    'purchase_number' => 'PRC-' . date('YmdHis'),
+                    'purchase_date' => now(),
                     'supplier_id' => $this->supplier_id,
                     'user_id' => Auth::id() ?? 1,
-                    'total_cost' => $this->total,
+                    'total_cost' => $this->total, 
                 ]);
 
                 foreach ($this->items as $item) {
-                    // 1. Simpan ke Riwayat Purchase
+                    // 2. Simpan Item (Pakai details() sesuai relasi di model Purchase kamu)
                     $purchase->details()->create([
                         'product_id' => $item['product_id'],
                         'quantity' => $item['quantity'],
@@ -127,14 +162,27 @@ class Create extends Component
                         'subtotal' => $item['subtotal']
                     ]);
 
-                    // 2. Tambah Stok Nyata ke Tabel ProductBatches
-                    ProductBatch::create([
-                        'product_id' => $item['product_id'],
-                        'batch_number' => $item['batch_number'],
-                        'expired_date' => $item['expired_date'],
-                        'purchase_price' => $item['purchase_price'],
-                        'stock' => $item['quantity']
-                    ]);
+                    // 3. Update atau Tambah Stok di ProductBatch
+                    $batch = ProductBatch::where('product_id', $item['product_id'])
+                                        ->where('batch_number', $item['batch_number'])
+                                        ->first();
+
+                    if ($batch) {
+                        $batch->increment('stock', $item['quantity']);
+                    } else {
+                        ProductBatch::create([
+                            'product_id' => $item['product_id'],
+                            'batch_number' => $item['batch_number'],
+                            'expired_date' => $item['expired_date'],
+                            'purchase_price' => $item['purchase_price'],
+                            'stock' => $item['quantity']
+                        ]);
+                    }
+                }
+
+                // 4. Update status PO jadi received
+                if ($this->purchase_order_id) {
+                    PurchaseOrder::where('id', $this->purchase_order_id)->update(['status' => 'received']);
                 }
             });
 
@@ -145,7 +193,6 @@ class Create extends Component
             session()->flash('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
     }
-
     // FUNGSI BARU: MENGIMPOR EXCEL
     public function importExcel()
     {
@@ -209,6 +256,9 @@ class Create extends Component
     public function render()
     {
         $suppliers = Supplier::all();
-        return view('livewire.purchases.create', compact('suppliers'));
+        // Cuma kirim PO yang statusnya 'ordered'
+        $purchaseOrders = PurchaseOrder::where('status', 'ordered')->latest()->get(); 
+        
+        return view('livewire.purchases.create', compact('suppliers', 'purchaseOrders'));
     }
 }

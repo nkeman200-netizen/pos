@@ -71,8 +71,28 @@
                     <span x-show="!sidebarCollapsed" class="font-bold text-sm whitespace-nowrap">Supplier</span>
                 </a>
 
+                <a href="{{ route('customers.index') }}" class="flex items-center gap-4 p-3 rounded-xl transition-all {{ request()->routeIs('customers.*') ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                    <div class="shrink-0 flex justify-center" :class="sidebarCollapsed ? 'w-full' : ''">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <span x-show="!sidebarCollapsed" class="font-bold text-sm whitespace-nowrap">Data Customer</span>
+                </a>
+                <a href="{{ route('categories.index') }}" class="flex items-center gap-4 p-3 rounded-xl transition-all {{ request()->routeIs('categories.*') ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                    <div class="shrink-0 flex justify-center" :class="sidebarCollapsed ? 'w-full' : ''">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tags-icon lucide-tags"><path d="M13.172 2a2 2 0 0 1 1.414.586l6.71 6.71a2.4 2.4 0 0 1 0 3.408l-4.592 4.592a2.4 2.4 0 0 1-3.408 0l-6.71-6.71A2 2 0 0 1 6 9.172V3a1 1 0 0 1 1-1z"/><path d="M2 7v6.172a2 2 0 0 0 .586 1.414l6.71 6.71a2.4 2.4 0 0 0 3.191.193"/><circle cx="10.5" cy="6.5" r=".5" fill="currentColor"/></svg>
+                    </div>
+                    <span x-show="!sidebarCollapsed" class="font-bold text-sm whitespace-nowrap">Data Categori</span>
+                </a>
+                
                 <p x-show="!sidebarCollapsed" class="px-3 pt-4 pb-2 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest whitespace-nowrap">Transaksi</p>
 
+                <a href="{{ route('purchase-orders.index') }}" class="flex items-center gap-4 p-3 rounded-xl transition-all {{ request()->routeIs('purchase-orders.*') ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                    <div class="shrink-0 flex justify-center" :class="sidebarCollapsed ? 'w-full' : ''">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+                    </div>
+                    <span x-show="!sidebarCollapsed" class="font-bold text-sm whitespace-nowrap">Purchase Order</span>
+                </a>
+                
                 <a href="{{ route('sales.create') }}" class="flex items-center gap-4 p-3 rounded-xl transition-all {{ request()->routeIs('sales.*') ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
                     <div class="shrink-0 flex justify-center" :class="sidebarCollapsed ? 'w-full' : ''">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>

@@ -1,14 +1,18 @@
 <div class="p-6">
     <div class="flex justify-between items-center mb-6">
-        <div class="flex items-center gap-4">
-            <a href="{{ route('purchases.index') }}" class="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
-                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        <div class="flex items-center gap-4 mb-8">
+            <a href="{{ route('purchases.index') }}" class="p-2.5 bg-white dark:bg-slate-800 text-gray-500 hover:text-indigo-600 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             </a>
-            <h2 class="text-2xl font-bold">Detail Faktur: {{ $purchase->purchase_number }}</h2>
-        </div>
-        <div class="text-right">
-            <span class="text-gray-500 text-sm">Admin:</span>
-            <span class="font-bold">{{ $purchase->user->name }}</span>
+            <div>
+                <h2 class="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight">Detail Faktur: {{ $purchase->purchase_number }}</h2>
+                <p class="text-sm text-gray-500 font-medium italic">Data penerimaan barang dari Supplier</p>
+            </div>
+            
+            <a href="{{ route('purchases.print', $purchase->id) }}" target="_blank" class="ml-auto bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-gray-50 transition-all shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                Cetak Faktur
+            </a>
         </div>
     </div>
 

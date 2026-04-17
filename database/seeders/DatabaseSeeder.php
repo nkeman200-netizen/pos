@@ -21,11 +21,13 @@ class DatabaseSeeder extends Seeder
             ['password' => Hash::make('password'), 'role' => 'admin']
         );
 
-        $supplier=[['name'=>'akwafkw'],
-            ['address'=>'cilacap'],
-            ['phone'=>'0888024242']];
+        $supplierData = [
+            'name'    => 'akwafkw',
+            'address' => 'cilacap',
+            'phone'   => '0888024242'
+        ];
         Supplier::firstOrCreate(
-            $supplier
+            $supplierData
         );
         
         // 2. Master Data: Kategori (Golongan Obat)
