@@ -14,7 +14,24 @@
 </head>
 <body>
     <div class="header">
-        <h1>PURCHASE ORDER</h1>
+        @php 
+            $apotek = \App\Models\PharmacyProfile::first(); 
+            $logoBase64 = null;
+            // Cek apakah logo ada dan file fisiknya benar-benar ada di server
+            if($apotek && $apotek->logo && file_exists(public_path('storage/' . $apotek->logo))) {
+                $type = pathinfo(public_path('storage/' . $apotek->logo), PATHINFO_EXTENSION);
+                $data = file_get_contents(public_path('storage/' . $apotek->logo));
+                $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            }
+        @endphp
+        
+        @if($logoBase64)
+            <img src="{{ $logoBase64 }}" alt="Logo Apotek" style="max-height: 80px; margin-bottom: 10px;">
+        @else
+            <h1 style="margin: 0;">{{ $apotek->name ?? 'POS APOTEK SOFYA' }}</h1>
+        @endif
+        
+        <h2>PURCHASE ORDER</h2>
         <p>No: {{ $po->po_number }} | Tanggal: {{ $po->order_date }}</p>
     </div>
 
@@ -27,8 +44,11 @@
                 Telp: {{ $po->supplier->phone }}
             </td>
             <td style="width: 50%; border: none; text-align: right;">
+                @php $apotek = \App\Models\PharmacyProfile::first(); @endphp
                 <strong>Dari:</strong><br>
-                POS APOTEK SOFYA<br>
+                <b>{{ $apotek->name ?? 'POS APOTEK SOFYA' }}</b><br>
+                @if($apotek->phone) Telp: {{ $apotek->phone }}<br> @endif
+                @if($apotek->address) {{ $apotek->address }}<br> @endif
                 Estimasi Tiba: {{ $po->expected_date }}
             </td>
         </tr>

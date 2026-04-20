@@ -21,6 +21,9 @@ class Index extends Component
 
     public function delete($id)
     {
+        if (\Illuminate\Support\Facades\Auth::user()->role !== 'admin') {
+            abort(403, 'Akses ditolak');
+        }
         $supplier = Supplier::findOrFail($id);
         // Opsional: Cek dulu apakah supplier ini sudah punya transaksi Purchase
         if ($supplier->purchases()->count() > 0) {

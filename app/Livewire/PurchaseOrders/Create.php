@@ -37,6 +37,17 @@ class Create extends Component
         return collect($this->items)->sum('subtotal');
     }
 
+    // Fungsi ini otomatis dipanggil Livewire setiap kali user mengetik di array $items
+    public function updatedItems($value, $key)
+    {
+        // $key bentuknya akan seperti "0.quantity" atau "0.purchase_price"
+        $parts = explode('.', $key);
+        if (count($parts) == 2) {
+            $index = $parts[0]; // Ambil angka index-nya (0, 1, 2, dst)
+            $this->syncItem($index); // Jalankan fungsi hitung subtotal
+        }
+    }
+    
     // FITUR PINTAR: Tarik Otomatis Obat Kritis (Aman & Anti-Error)
     public function loadKritis()
     {
@@ -112,6 +123,9 @@ class Create extends Component
 
     public function savePO()
     {
+        if (\Illuminate\Support\Facades\Auth::user()->role !== 'admin') {
+            abort(403, 'Akses ditolak');
+        }
         $this->validate([
             'supplier_id' => 'required',
             'expected_date' => 'required|date|after_or_equal:today',

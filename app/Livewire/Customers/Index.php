@@ -23,6 +23,9 @@ class Index extends Component
     }
 
     public function delete($id){
+        if (\Illuminate\Support\Facades\Auth::user()->role !== 'admin') {
+            abort(403, 'Akses ditolak');
+        }
         Customer::findOrFail($id)->deleteOrFail();
         session::flash('success','Customer berhasil dihapus');
     }

@@ -23,7 +23,7 @@ class Edit extends Component
     public function update(){
         $this->validate([
             'name' => 'required|min:3',
-            'phone' => 'required|numeric',
+            'phone' => 'required|numeric|unique:customers,phone,'.$this->customerId,
             'address' => 'required',
         ]);
 

@@ -13,10 +13,26 @@
     </style>
 </head>
 <body>
-    <div class="header">
+    <div class="header" style="text-align: center; margin-bottom: 30px;">
+        @php 
+            $apotek = \App\Models\PharmacyProfile::first(); 
+            $logoBase64 = null;
+            // Cek apakah logo ada dan file fisiknya benar-benar ada di server
+            if($apotek && $apotek->logo && file_exists(public_path('storage/' . $apotek->logo))) {
+                $type = pathinfo(public_path('storage/' . $apotek->logo), PATHINFO_EXTENSION);
+                $data = file_get_contents(public_path('storage/' . $apotek->logo));
+                $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            }
+        @endphp
+        
+        @if($logoBase64)
+            <img src="{{ $logoBase64 }}" alt="Logo Apotek" style="max-height: 80px; margin-bottom: 10px;">
+        @else
+            <h1 style="margin: 0;">{{ $apotek->name ?? 'POS APOTEK SOFYA' }}</h1>
+        @endif
         <h2 style="margin-bottom: 5px;">BUKTI PENERIMAAN BARANG</h2>
         <p style="margin: 0;">No. Faktur: {{ $purchase->purchase_number }} | Tgl Terima: {{ $purchase->purchase_date }}</p>
-    </div>
+    </div>  
 
     <table style="width: 100%; margin-bottom: 10px;">
         <tr>

@@ -15,12 +15,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Buat User Admin & Kasir (Jika belum ada)
-        User::firstOrCreate(
-            ['name' => 'Admin Utama'],
-            ['password' => Hash::make('password'), 'role' => 'admin']
-        );
-
         $supplierData = [
             'name'    => 'akwafkw',
             'address' => 'cilacap',

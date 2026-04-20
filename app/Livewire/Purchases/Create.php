@@ -52,6 +52,17 @@ class Create extends Component
         return collect($this->items)->sum('subtotal');
     }
 
+    // Fungsi ini otomatis dipanggil Livewire setiap kali user mengetik di array $items
+    public function updatedItems($value, $key)
+    {
+        // $key bentuknya akan seperti "0.quantity" atau "0.purchase_price"
+        $parts = explode('.', $key);
+        if (count($parts) == 2) {
+            $index = $parts[0]; // Ambil angka index-nya (0, 1, 2, dst)
+            $this->syncItem($index); // Jalankan fungsi hitung subtotal
+        }
+    }
+    
     // Fungsi canggih: Auto-add saat di-scan
     public function addToCart($idProduct)
     {
@@ -97,33 +108,11 @@ class Create extends Component
 // FITUR UTAMA: Tarik Data PO Otomatis
 
 
-    public function updatedPurchaseOrderId($id)
-    {
-        if (!$id) return;
-
-        $po = PurchaseOrder::with(['items.product', 'supplier'])->find($id);
-        
-        if ($po) {
-            $this->supplier_id = $po->supplier_id;
-            $this->items = []; // Reset keranjang
-
-            foreach ($po->items as $item) {
-                $this->items[] = [
-                    'product_id' => $item->product_id,
-                    'name' => $item->product->name,
-                    'unit_name' => $item->product->unit->short_name ?? '',
-                    'quantity' => $item->quantity,
-                    'purchase_price' => $item->purchase_price,
-                    'batch_number' => '', 
-                    'expired_date' => '',  // <-- Sudah pakai expired_date sesuai DB kamu
-                    'subtotal' => $item->subtotal
-                ];
-            }
-        }
-    }
-
     public function saveTransaction()
     {
+        if (\Illuminate\Support\Facades\Auth::user()->role !== 'admin') {
+            abort(403, 'Akses ditolak');
+        }
         $this->validate([
             'supplier_id' => 'required',
         ], [

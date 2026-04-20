@@ -22,6 +22,9 @@ class Create extends Component
 
     public function save()
     {
+        if (\Illuminate\Support\Facades\Auth::user()->role !== 'admin') {
+            abort(403, 'Akses ditolak');
+        }
         $this->validate();
         Supplier::create([
             'name' => $this->name,

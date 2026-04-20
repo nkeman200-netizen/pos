@@ -8,7 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class Sale extends Model
 {
     use Auditable;
-    protected $fillable = ['invoice_number', 'total_price', 'pembayaran', 'kembalian', 'user_id', 'customer_id'];
+    
+    // TAMBAHAN: Masukkan 'status' dan 'void_reason' ke dalam fillable
+    protected $fillable = [
+        'invoice_number', 
+        'total_price', 
+        'pembayaran', 
+        'kembalian', 
+        'user_id', 
+        'customer_id',
+        'status',          // <-- WAJIB ADA
+        'void_reason'      // <-- WAJIB ADA
+    ];
 
     // Relasi ke Kasir
     public function user()

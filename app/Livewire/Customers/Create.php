@@ -16,10 +16,13 @@ class Create extends Component
 
     public function save()
     {
+        if (\Illuminate\Support\Facades\Auth::user()->role !== 'admin') {
+            abort(403, 'Akses ditolak');
+        }
         // 1. Validasi Dulu (Best Practice!)
         $this->validate([
             'name' => 'required|min:3',
-            'phone' => 'required|numeric',
+            'phone' => 'required|numeric|unique:customers,phone',
             'address' => 'required',
         ]);
 

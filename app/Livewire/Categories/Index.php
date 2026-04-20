@@ -31,8 +31,11 @@ class Index extends Component
         $this->reset(['name', 'selected_id']);
     }
 
-    public function store()
+    public function save()
     {
+        if (\Illuminate\Support\Facades\Auth::user()->role !== 'admin') {
+            abort(403, 'Akses ditolak');
+        }
         $this->validate();
         Category::updateOrCreate(['id' => $this->selected_id], ['name' => $this->name]);
         
@@ -50,6 +53,9 @@ class Index extends Component
 
     public function delete($id)
     {
+        if (\Illuminate\Support\Facades\Auth::user()->role !== 'admin') {
+            abort(403, 'Akses ditolak');
+        }
         Category::find($id)->delete();
         session()->flash('message', 'Kategori dihapus.');
     }

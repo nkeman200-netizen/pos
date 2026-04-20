@@ -5,10 +5,12 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">Kelola riwayat pemesanan barang ke PBF/Supplier</p>
         </div>
         
+        @if(auth()->user()->role === 'admin')
         <a href="{{ route('purchase-orders.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-indigo-500/30 transition-all whitespace-nowrap">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
             Buat PO Baru
         </a>
+        @endif
     </div>
 
     @if (session()->has('success'))
@@ -38,7 +40,9 @@
                         <th class="px-5 py-4 font-bold">Estimasi Tiba</th>
                         <th class="px-5 py-4 font-bold text-right">Total</th>
                         <th class="px-5 py-4 font-bold text-center">Status</th>
+                        @if(auth()->user()->role === 'admin')
                         <th class="px-5 py-4 font-bold text-center">Aksi</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-slate-700/50">
@@ -56,6 +60,7 @@
                                 <span class="bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">{{ $po->status }}</span>
                             @endif
                         </td>
+                        @if(auth()->user()->role === 'admin')
                         <td class="px-5 py-4 text-center">
                             <div class="flex items-center justify-center gap-2">
                                 <a href="{{ route('purchase-orders.show', $po->id) }}" class="p-2 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition" title="Lihat Detail">
@@ -68,6 +73,7 @@
                                 @endif
                             </div>
                         </td>
+                        @endif
                     </tr>
                     @empty
                     <tr>
