@@ -20,6 +20,13 @@
         }
     </style>
 
+    {{-- <script>
+        // Redirect otomatis ke Kasir Baru setelah dialog print ditutup atau dicancel
+        window.onafterprint = function() {
+            window.location.href = "{{ route('sales.create') }}";
+        };
+    </script> --}}
+
     <div class="w-full max-w-2xl">
         @if (session()->has('success'))
             <div class="mb-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl font-black text-center no-print">
@@ -27,15 +34,23 @@
             </div>
         @endif
 
-        <div class="flex justify-between items-center mb-6 no-print">
-            <a href="{{ route('sales.index') }}" class="text-gray-500 font-bold hover:text-indigo-600 flex items-center gap-2">
+        <div class="flex flex-wrap justify-between items-center mb-6 gap-4 no-print">
+            <a href="{{ route('sales.index') }}" class="text-gray-500 font-bold hover:text-indigo-600 flex items-center gap-2 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg> Riwayat
             </a>
-            <div class="flex gap-2">
+            
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('sales.create') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold shadow-md flex items-center gap-2 transition text-sm">
+                    Kembali Kasir (ESC)
+                </a>
+                
                 @if($sale->status === 'completed' && in_array(auth()->user()->role, ['admin', 'owner']))
-                <button @click="showVoidModal = true" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-bold border border-red-200">Void</button>
+                <button @click="showVoidModal = true" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-bold border border-red-200 hover:bg-red-100 transition text-sm">Void</button>
                 @endif
-                <button onclick="window.print()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold shadow-md">Cetak</button>
+                
+                <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold shadow-md transition flex items-center gap-2 text-sm">
+                    Cetak Ulang
+                </button>
             </div>
         </div>
 
@@ -115,9 +130,9 @@
     <div x-show="showVoidModal" x-cloak class="no-print fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md">
             <h2 class="text-xl font-black mb-4">Batalkan Transaksi?</h2>
-            <input type="text" wire:model="voidReason" class="w-full p-4 bg-gray-50 border rounded-xl mb-6" placeholder="Alasan pembatalan...">
+            <input type="text" wire:model="voidReason" class="w-full p-4 bg-gray-50 font-bold text-gray-700 border rounded-xl mb-6" placeholder="Alasan pembatalan...">
             <div class="flex gap-3">
-                <button @click="showVoidModal = false" class="flex-1 py-3 bg-gray-100 rounded-xl font-bold">Batal</button>
+                <button @click="showVoidModal = false" class="flex-1 py-3 bg-gray-100 text-gray-500 rounded-xl font-bold">Batal</button>
                 <button wire:click="voidTransaction" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-black">Eksekusi Void</button>
             </div>
         </div>

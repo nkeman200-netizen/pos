@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Sales;
 
+use App\Models\CashierShift;
 use App\Models\Customer;
+use App\Models\HeldTransaction;
+use App\Models\PharmacyProfile;
 use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\Sale;
-use App\Models\HeldTransaction;
-use App\Models\CashierShift;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -18,7 +20,7 @@ use Livewire\Component;
 class Create extends Component
 {
     #[Layout('layouts.app')]
-    #[Title('Kasir')]
+    #[Title('Kasir Penjualan')]
     
     public $cart = [];
     public $customerId = '';
@@ -28,344 +30,205 @@ class Create extends Component
 
     public $isLocked = false;
     public $pinInput = '';
-
+    public $hasOpenShift = false;
+    public $startingCash = '';
+    public $actualCash='';
+    
     public $holdNote = '';
     public $heldTransactionsList = [];
 
-    // STATE MANAJEMEN SHIFT
-    public $hasOpenShift = false;
-    public $startingCash = '';
-    public $actualCash = ''; // <-- Untuk input uang fisik saat tutup kasir
-    public $paymentMethod = 'cash'; // Default selalu tunai
-    public $paymentReference = '';  // Untuk input nomor EDC / QRIS
+    public $paymentMethod = 'cash'; 
+    public $paymentReference = '';  
+    public $showQrisModal = false; 
+    public $qrisString = '';
 
     public function mount()
     {
         $this->isLocked = session('kasir_locked', false);
         $this->hasOpenShift = CashierShift::where('user_id', Auth::id())->where('status', 'open')->exists();
+        $this->loadHeldTransactions();
     }
 
-    public function getStartingCashMurniProperty() 
-    {
-        return (int) preg_replace('/[^0-9]/', '', (string)$this->startingCash);
-    }
-
-    public function getActualCashMurniProperty() 
-    {
-        return (int) preg_replace('/[^0-9]/', '', (string)$this->actualCash);
-    }
-
-    public function startShift()
-    {
-        $nominal = $this->startingCashMurni;
-        
-        if ($this->startingCash === '' || $nominal < 0) {
-            session()->flash('shift_error', 'Nominal modal laci harus diisi!');
-            return;
-        }
-
-        CashierShift::create([
-            'user_id' => Auth::id(),
-            'start_time' => now(),
-            'starting_cash' => $nominal,
-            'expected_cash' => $nominal,
-            'status' => 'open',
-        ]);
-
-        $this->hasOpenShift = true;
-        $this->startingCash = '';
-        $this->dispatch('item-added'); 
-    }
-
-    // FUNGSI BARU: TUTUP KASIR (BLIND DROP)
-    public function closeShift()
-    {
-        $nominalFisik = $this->actualCashMurni;
-
-        if ($this->actualCash === '' || $nominalFisik < 0) {
-            session()->flash('close_shift_error', 'Nominal uang fisik harus diisi!');
-            return;
-        }
-
-        $openShift = CashierShift::where('user_id', Auth::id())->where('status', 'open')->first();
-
-        if ($openShift) {
-            $selisih = $nominalFisik - $openShift->expected_cash;
-            $statusSelisih = $selisih == 0 ? 'Sesuai (Balance)' : ($selisih > 0 ? 'Lebih Rp' . number_format($selisih) : 'Minus/Kurang Rp' . number_format(abs($selisih)));
-
-            $openShift->update([
-                'actual_cash' => $nominalFisik,
-                'end_time' => now(),
-                'status' => 'closed',
-            ]);
-
-            // Pesan ini akan dibawa menyeberang ke halaman Login bawaan Laravel
-            session()->flash('status', "Shift " . Auth::user()->name . " Berhasil Ditutup! Laporan: " . $statusSelisih);
-        }
-
-        $this->dispatch('close-modals');
-
-        // PROSES LOGOUT PAKSA STANDAR KEAMANAN LARAVEL
-        Auth::logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-
-        // Lempar kasir keluar ke halaman Login!
-        return redirect('/login');
-    }
-
-    public function confirmHold()
-    {
-        if (empty($this->cart)) {
-            session()->flash('error', 'Keranjang kosong, tidak ada yang bisa ditahan!');
-            return;
-        }
-        $this->dispatch('open-hold-modal');
-    }
-
-    public function executeHold()
-    {
-        if (empty($this->cart)) return;
-
-        HeldTransaction::create([
-            'user_id' => Auth::id(),
-            'customer_id' => $this->customerId ?: null,
-            'cart_data' => $this->cart,
-            'total_price' => $this->total,
-            'reference_notes' => $this->holdNote ?: 'Antrean ' . date('H:i:s'),
-        ]);
-
-        $this->reset(['cart', 'customerId', 'pembayaran', 'searchQuery', 'qty', 'holdNote']);
-        session()->flash('success', 'Transaksi berhasil ditahan/diparkir!');
-        $this->dispatch('close-modals');
-    }
-
-    public function openRecall()
-    {
-        $this->heldTransactionsList = HeldTransaction::with('customer')->where('user_id', Auth::id())->latest()->get();
-        $this->dispatch('open-recall-modal');
-    }
-
-
-    public function restoreTransaction($id)
-    {
-        $held = HeldTransaction::find($id);
-        if ($held) {
-            if (!empty($this->cart)) {
-                session()->flash('error', 'Keranjang saat ini masih terisi! Selesaikan atau Tahan (F6) dulu sebelum memanggil antrean lain.');
-                $this->dispatch('close-modals');
-                return;
-            }
-
-            $this->cart = $held->cart_data;
-            $this->customerId = $held->customer_id;
-            $held->delete(); 
-
-            session()->flash('success', 'Transaksi berhasil dipanggil kembali!');
-            $this->dispatch('close-modals');
-        }
-    }
-
-    public function deleteHeld($id)
-    {
-        HeldTransaction::find($id)?->delete();
-        $this->heldTransactionsList = HeldTransaction::with('customer')->where('user_id', Auth::id())->latest()->get();
-    }
-
-    public function lockCashier()
-    {
-        $this->isLocked = true;
-        $this->pinInput = '';
-        session(['kasir_locked' => true]);
-    }
-
-    public function unlockCashier()
-    {
-        $user = Auth::user();
-        if ($user->pin === $this->pinInput || empty($user->pin)) {
-            $this->isLocked = false;
-            $this->pinInput = '';
-            session(['kasir_locked' => false]);
-            $this->dispatch('item-added'); 
-        } else {
-            session()->flash('pin_error', 'PIN Salah!');
-            $this->pinInput = '';
-        }
-    }
-
-    public function updatedSearchQuery()
-    {
-        $this->dispatch('reset-highlight');
-    }
-
-    public function updatedCart($value, $name)
-    {
-        $parts = explode('.', $name);
-        if (count($parts) == 2 && $parts[1] === 'quantity') {
-            $this->updateQuantity($parts[0], $value);
-        }
-    }
-
-    public function getPembayaranMurniProperty() 
-    {
-        return (int) preg_replace('/[^0-9]/', '', (string)$this->pembayaran);
-    }
-
-    public function getTotalProperty() 
+    #[Computed]
+    public function total()
     {
         return collect($this->cart)->sum('subtotal');
     }
 
-    public function getKembalianProperty() 
+    #[Computed]
+    public function pembayaranMurni()
+    {
+        return (int) str_replace('.', '', $this->pembayaran);
+    }
+
+    #[Computed]
+    public function kembalian()
     {
         return $this->pembayaranMurni - $this->total;
     }
 
-    #[Computed]
-    public function searchResults()
+    public function getSearchResultsProperty()
     {
         if (strlen($this->searchQuery) < 2) return collect();
-        return Product::with('unit')
+        return Product::with(['unit', 'batches'])
             ->where('name', 'like', '%' . $this->searchQuery . '%')
             ->orWhere('sku', 'like', '%' . $this->searchQuery . '%')
-            ->where('is_active', true)
-            ->take(5)->get();
+            ->get();
     }
 
-    public function addSelectedResult($index)
+    public function addHighlightedToCart($index)
     {
         $results = $this->searchResults->values();
-        if ($results->count() > 0 && isset($results[$index])) {
-            $this->addToCart($results[$index]->id);
-        } else {
-            session()->flash('error', 'Obat tidak ditemukan / Barcode salah!');
-            $this->searchQuery = '';
-            $this->dispatch('item-added');
+        if (isset($results[$index])) {
+            $this->addToCart($results[$index]);
         }
     }
 
-    public function addToCart($idProduct) 
+    public function addToCart($product)
     {
-        if (!$idProduct) return; 
-        $product = Product::find($idProduct); 
-        if (!$product){
-            session()->flash('error','Data obat tidak ditemukan.');
+        $totalStock = collect($product['batches'])->sum('stock');
+        if ($totalStock <= 0) {
+            session()->flash('error', 'Stok obat ini sedang kosong!');
             return;
         }
 
-        $key = $product->id; 
-        $totalQty = (isset($this->cart[$key]) ? $this->cart[$key]['quantity'] : 0) + (int)$this->qty; 
-        
-        if ($product->stock < $totalQty) { 
-            session()->flash('error', 'Stok ' . $product->name . ' tidak cukup!');
-            return; 
-        }
+        $existingIndex = collect($this->cart)->search(fn($item) => $item['product_id'] == $product['id']);
 
-        if (isset($this->cart[$key])) { 
-            $item = $this->cart[$key];
-            $item['quantity'] = $totalQty;   
-            $item['subtotal'] = $totalQty * $item['unit_price'];
-            unset($this->cart[$key]); 
-            $this->cart = [$key => $item] + $this->cart; 
+        if ($existingIndex !== false) {
+            if ($this->cart[$existingIndex]['quantity'] + $this->qty > $totalStock) {
+                session()->flash('error', 'Stok tidak mencukupi untuk ditambah lagi!');
+                return;
+            }
+            
+            $item = $this->cart[$existingIndex];
+            $item['quantity'] += $this->qty;
+            $item['subtotal'] = $item['quantity'] * $item['unit_price'];
+            
+            unset($this->cart[$existingIndex]);
+            $this->cart = array_values($this->cart);
+            array_unshift($this->cart, $item);
+
         } else {
             $newItem = [
-                'product_id' => $product->id,
-                'name' => $product->name,
-                'unit_price' => $product->selling_price,
-                'quantity' => (int)$this->qty,
-                'subtotal' => (int)$this->qty * $product->selling_price
+                'product_id' => $product['id'],
+                'name' => $product['name'],
+                'unit_price' => $product['selling_price'],
+                'quantity' => $this->qty,
+                'subtotal' => $product['selling_price'] * $this->qty,
             ];
-            $this->cart = [$key => $newItem] + $this->cart; 
+            array_unshift($this->cart, $newItem);
         }
         
-        $this->searchQuery = ''; 
-        $this->dispatch('reset-highlight'); 
-        $this->dispatch('item-added');
+        $this->qty = 1;
+        $this->searchQuery = '';
+        $this->dispatch('item-added'); 
     }
 
-    public function removeFromCart($key) 
+    public function removeFromCart($index)
     {
-        unset($this->cart[$key]);
-        $this->dispatch('item-added');
+        unset($this->cart[$index]);
+        $this->cart = array_values($this->cart);
     }
 
-    public function updateQuantity($key, $qty)
+    public function incrementQuantity($index)
     {
-        if (!isset($this->cart[$key])) return;
+        $product = Product::with('batches')->find($this->cart[$index]['product_id']);
+        $totalStock = collect($product->batches)->sum('stock');
         
+        if ($this->cart[$index]['quantity'] < $totalStock) {
+            $this->cart[$index]['quantity']++;
+            $this->cart[$index]['subtotal'] = $this->cart[$index]['quantity'] * $this->cart[$index]['unit_price'];
+        } else {
+            session()->flash('error', 'Maksimal stok tercapai!');
+        }
+    }
+
+    public function decrementQuantity($index)
+    {
+        if ($this->cart[$index]['quantity'] > 1) {
+            $this->cart[$index]['quantity']--;
+            $this->cart[$index]['subtotal'] = $this->cart[$index]['quantity'] * $this->cart[$index]['unit_price'];
+        } else {
+            $this->removeFromCart($index);
+        }
+    }
+
+    public function updateQuantity($index, $qty)
+    {
         $qty = (int) $qty;
-        if ($qty < 1) $qty = 1;
-
-        $product = Product::find($this->cart[$key]['product_id']);
-        
-        if ($qty > $product->stock) {
-            $qty = $product->stock;
-            session()->flash('error', "Stok {$product->name} tersisa {$product->stock}!");
+        if ($qty < 1) {
+            $this->removeFromCart($index);
+            return;
         }
 
-        $this->cart[$key]['quantity'] = $qty;
-        $this->cart[$key]['subtotal'] = $qty * $this->cart[$key]['unit_price'];
-    }
+        $product = Product::with('batches')->find($this->cart[$index]['product_id']);
+        $totalStock = collect($product->batches)->sum('stock');
 
-    public function incrementQty($key) 
-    {
-        if (isset($this->cart[$key])) {
-            $this->updateQuantity($key, $this->cart[$key]['quantity'] + 1);
-        }
-    }
-
-    public function decrementQty($key) 
-    {
-        if (isset($this->cart[$key]) && $this->cart[$key]['quantity'] > 1) {
-            $this->updateQuantity($key, $this->cart[$key]['quantity'] - 1);
+        if ($qty <= $totalStock) {
+            $this->cart[$index]['quantity'] = $qty;
+            $this->cart[$index]['subtotal'] = $this->cart[$index]['quantity'] * $this->cart[$index]['unit_price'];
+        } else {
+            session()->flash('error', 'Stok tidak mencukupi!');
+            $this->cart[$index]['quantity'] = $totalStock; 
+            $this->cart[$index]['subtotal'] = $this->cart[$index]['quantity'] * $this->cart[$index]['unit_price'];
         }
     }
 
     public function saveTransaction()  
     {
-        if (!in_array(Auth::user()->role, ['admin', 'kasir'])) {
-            abort(403, 'Akses ditolak');
-        }
-
-        // Validasi Keranjang
         if (empty($this->cart)) {
-            session()->flash('error', 'Keranjang kosong!');
+            session()->flash('error', 'Keranjang belanja masih kosong!');
             return;
         }
 
-        // Logika Uang: Jika Non-Tunai, Uang Dibayar OTOMATIS sama dengan Total (Kembalian 0)
+        if ($this->paymentMethod === 'qris') {
+            $profile = PharmacyProfile::first();
+            if (!$profile || !$profile->qris_string) {
+                session()->flash('error', 'Data QRIS belum diatur di Profil Apotek!');
+                return;
+            }
+            $this->qrisString = $this->makeDynamicQRIS($profile->qris_string, $this->total);
+            $this->showQrisModal = true;
+            return;
+        }
+
+        $this->executeCheckout();
+    }
+
+    public function confirmQrisPaymentAndCheckout()
+    {
+        $this->paymentReference = 'QR' . strtoupper(uniqid()); 
+        $this->executeCheckout();
+    }
+
+    private function executeCheckout()
+    {
         $nominalDibayar = $this->paymentMethod === 'cash' ? $this->pembayaranMurni : $this->total;
         $kembalianFinal = $this->paymentMethod === 'cash' ? $this->kembalian : 0;
 
-        if ($nominalDibayar < $this->total) {
-            session()->flash('error', 'Uang pembayaran kurang!');
-            return;
-        }
-
-        // Validasi Referensi Non-Tunai
-        if ($this->paymentMethod !== 'cash' && empty($this->paymentReference)) {
-            session()->flash('error', 'Nomor Referensi (EDC/QRIS) WAJIB diisi untuk pembayaran Non-Tunai!');
+        if ($this->paymentMethod === 'cash' && $nominalDibayar < $this->total) {
+            session()->flash('error', 'Pembayaran tunai kurang!');
             return;
         }
 
         try {
             $createdSaleId = null;
 
-            DB::transaction(function () use (&$createdSaleId, $nominalDibayar, $kembalianFinal) { 
+            DB::transaction(function () use (&$createdSaleId, $nominalDibayar, $kembalianFinal) {
                 $sale = Sale::create([
                     'invoice_number'    => 'INV-' . date('ymdHis'), 
                     'customer_id'       => $this->customerId ?: null,
-                    'user_id'           => Auth::id() ?? 1, 
+                    'user_id'           => Auth::id(), 
                     'total_price'       => $this->total, 
                     'pembayaran'        => $nominalDibayar, 
                     'kembalian'         => $kembalianFinal,
                     'payment_method'    => $this->paymentMethod,
-                    'payment_reference' => $this->paymentMethod !== 'cash' ? $this->paymentReference : null,
+                    'payment_reference' => $this->paymentReference ?: null,
+                    'status'            => 'completed'
                 ]);
 
                 $createdSaleId = $sale->id;
 
-                // Uang laci bertambah HANYA jika pembayarannya CASH (Tunai)
                 if ($this->paymentMethod === 'cash') {
                     $openShift = CashierShift::where('user_id', Auth::id())->where('status', 'open')->first();
                     if ($openShift) {
@@ -373,8 +236,7 @@ class Create extends Component
                     }
                 }
 
-                // Pengurangan Stok Batch (Tetap sama)
-                foreach ($this->cart as $item) { 
+                foreach ($this->cart as $item) {
                     $sale->details()->create([
                         'product_id' => $item['product_id'],
                         'quantity' => $item['quantity'],
@@ -387,7 +249,6 @@ class Create extends Component
                         ->where('stock', '>', 0)
                         ->where('expired_date', '>=', now())
                         ->orderBy('expired_date', 'asc')
-                        ->lockForUpdate() 
                         ->get();
 
                     foreach ($batches as $batch) {
@@ -400,23 +261,123 @@ class Create extends Component
                             $batch->update(['stock' => 0]); 
                         }
                     }
-                    if ($qtyDibutuhkan > 0) {
-                        throw new \Exception("Gagal! Stok fisik {$item['name']} tidak sinkron.");
-                    }
-                }   
+                }
             });
 
-            $this->dispatch('transaction-success', [
-                'kembalian' => $kembalianFinal, 
-                'printUrl' => route('sales.show', $createdSaleId)
-            ]);
-            
-            // Reset Semua State Kasir
-            $this->reset(['cart', 'customerId', 'pembayaran', 'searchQuery', 'qty', 'paymentMethod', 'paymentReference']);
+            return redirect()->route('sales.show', $createdSaleId);
             
         } catch (\Exception $e) {
-            session()->flash('error', $e->getMessage());
+            session()->flash('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
+    }
+
+    private function makeDynamicQRIS($fullPayload, $amount)
+    {
+        $payload = substr($fullPayload, 0, -4); 
+        $payload = str_replace('010211', '010212', $payload); 
+        
+        $valAmount = (string) $amount;
+        $lenAmount = str_pad(strlen($valAmount), 2, '0', STR_PAD_LEFT);
+        $payload .= "54" . $lenAmount . $valAmount;
+        
+        $payload .= "6304"; 
+        $crc = $this->crc16($payload); 
+        return $payload . $crc;
+    }
+
+    private function crc16($data)
+    {
+        $crc = 0xFFFF;
+        for ($i = 0; $i < strlen($data); $i++) {
+            $x = (($crc >> 8) ^ ord($data[$i])) & 0xFF;
+            $x ^= $x >> 4;
+            $crc = (($crc << 8) ^ ($x << 12) ^ ($x << 5) ^ $x) & 0xFFFF;
+        }
+        return strtoupper(str_pad(dechex($crc), 4, '0', STR_PAD_LEFT));
+    }
+
+    public function lockCashier() {
+        $this->isLocked = true;
+        session(['kasir_locked' => true]);
+    }
+
+    public function unlockCashier() {
+        if ($this->pinInput == Auth::user()->pin) { 
+            $this->isLocked = false;
+            $this->pinInput = '';
+            session(['kasir_locked' => false]);
+        } else {
+            session()->flash('pin_error', 'PIN Keamanan Salah!');
+        }
+    }
+
+    public function openShift() {
+        $startingCash = (int) str_replace('.', '', $this->startingCash);
+        CashierShift::create([
+            'user_id' => Auth::id(),
+            'starting_cash' => $startingCash,
+            'expected_cash' => $startingCash,
+            'status' => 'open',
+            'start_time' => now()
+        ]);
+        $this->hasOpenShift = true;
+    }
+
+    // Tambahkan 2 metode ini di dalam class Create
+    public function closeShift()
+    {
+        // Langsung bersihkan titik/karakter non-angka di sini
+        $nominalFisik = (int) preg_replace('/[^0-9]/', '', (string) $this->actualCash);
+
+        if ($this->actualCash === '' || $nominalFisik < 0) {
+            session()->flash('close_shift_error', 'Hitung fisik laci dan masukkan nominalnya!');
+            return;
+        }
+
+        $openShift = CashierShift::where('user_id', Auth::id())->where('status', 'open')->first();
+
+        if ($openShift) {
+            $openShift->update([
+                'actual_cash' => $nominalFisik,
+                'end_time' => now(),
+                'status' => 'closed',
+            ]);
+        }
+
+        // Paksa Kasir Keluar (Logout) setelah shift ditutup
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        return redirect('/login');
+    }
+    public function holdTransaction() {
+        if (empty($this->cart)) {
+            session()->flash('error', 'Keranjang kosong, tidak ada yang ditahan.');
+            return;
+        }
+        
+        HeldTransaction::create([
+            'user_id' => Auth::id(),
+            'customer_id' => $this->customerId ?: null,
+            'cart_data' => $this->cart,
+            'notes' => $this->holdNote,
+        ]);
+        
+        $this->reset(['cart', 'customerId', 'holdNote', 'pembayaran']);
+        $this->loadHeldTransactions();
+    }
+
+    public function loadHeldTransactions() {
+        $this->heldTransactionsList = HeldTransaction::where('user_id', Auth::id())->latest()->get();
+    }
+
+    public function recallTransaction($id) {
+        $held = HeldTransaction::findOrFail($id);
+        $this->cart = $held->cart_data;
+        $this->customerId = $held->customer_id;
+        $held->delete();
+        $this->loadHeldTransactions();
     }
 
     public function render()
