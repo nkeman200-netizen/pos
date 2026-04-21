@@ -3,8 +3,12 @@
 namespace App\Livewire\Settings;
 
 use App\Models\PharmacyProfile;
+use App\Models\User; // Tambahkan ini
+use Illuminate\Support\Facades\Auth; // Tambahkan ini
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class Profile extends Component
 {
@@ -19,7 +23,7 @@ class Profile extends Component
     
     public $logo;
     public $existingLogo;
-
+    
     public function mount()
     {
         $profile = PharmacyProfile::first();

@@ -273,14 +273,21 @@ class Create extends Component
 
     private function makeDynamicQRIS($fullPayload, $amount)
     {
-        $payload = substr($fullPayload, 0, -4); 
+        // 1. Buang 8 karakter terakhir (Tag '6304' + 4 digit CRC lama) secara bersih
+        $payload = substr($fullPayload, 0, -8); 
+        
+        // 2. Ubah indikator menjadi dinamis (010211 -> 010212)
         $payload = str_replace('010211', '010212', $payload); 
         
+        // 3. Suntikkan Tag 54 (Amount) tepat sebelum CRC
         $valAmount = (string) $amount;
         $lenAmount = str_pad(strlen($valAmount), 2, '0', STR_PAD_LEFT);
         $payload .= "54" . $lenAmount . $valAmount;
         
+        // 4. Pasang kembali penutup Tag 63 (CRC) di bagian ekor
         $payload .= "6304"; 
+        
+        // 5. Hitung CRC16 yang baru
         $crc = $this->crc16($payload); 
         return $payload . $crc;
     }

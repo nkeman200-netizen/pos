@@ -14,8 +14,11 @@
         },
         get isLunas() {
             if ($wire.paymentMethod !== 'cash') return true;
-            let pay = parseInt($wire.pembayaran.replace(/[^0-9]/g, '')) || 0;
-            return pay >= $wire.total;
+            // Gunakan konversi String untuk menghindari error manipulasi teks
+            let payStr = String($wire.pembayaran || '0');
+            let pay = parseInt(payStr.replace(/[^0-9]/g, '')) || 0;
+            // Gunakan injeksi Blade langsung {{ $this->total }} alih-alih $wire.total
+            return pay >= {{ $this->total }};
         }
     }"
     x-init="
@@ -29,7 +32,9 @@
     @item-added.window="if($refs.searchInput) $refs.searchInput.focus(); highlightIndex = 0;"
     @open-hold-modal.window="showHoldModal = true; setTimeout(() => $refs.holdNoteInput.focus(), 100);"
     @open-recall-modal.window="showRecallModal = true; setTimeout(() => { let f = document.getElementById('recall-btn-0'); if(f) f.focus(); }, 100);"
-    @open-close-shift-modal.window="showCloseShiftModal = true; setTimeout(() => $refs.actualCashInput.focus(), 100);">
+    @open-close-shift-modal.window="showCloseShiftModal = true; setTimeout(() => $refs.actualCashInput.focus(), 100);"
+    @keydown.shift.enter.window.prevent="if(!showHoldModal && !showRecallModal && !showQrisModal && !showCloseShiftModal && isLunas && {{ $this->total }} > 0) $wire.saveTransaction();">
+    
 
     @if($isLocked)
     <div class="fixed inset-0 z-[1000] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4">
@@ -259,16 +264,18 @@
                     </div>
                 </div>
 
-                <button type="button" wire:click="saveTransaction" x-bind:disabled="!isLunas || $wire.total <= 0"
-                    :class="(isLunas && $wire.total > 0) ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/30 focus:ring-emerald-300' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30 focus:ring-indigo-300'"
-                    class="w-full py-5 text-white font-black text-lg rounded-2xl shadow-lg transition-all disabled:opacity-30 disabled:grayscale focus:ring-4">
+                <button type="button" wire:click="saveTransaction" x-bind:disabled="!isLunas || {{ $this->total }} <= 0"
+                        :class="(isLunas && {{ $this->total }} > 0) ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/30 focus:ring-emerald-300' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30 focus:ring-indigo-300'"
+                        class="w-full py-5 text-white font-black text-lg rounded-2xl shadow-lg transition-all disabled:opacity-30 disabled:grayscale focus:ring-4">
                     PROSES BAYAR (SHIFT + ENTER)
                 </button>
             </div>
         </div>
     </div>
 
-    <div x-show="showQrisModal" x-cloak class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+    <div x-show="showQrisModal" x-cloak 
+        @keydown.enter.window.prevent="if(showQrisModal) { $wire.confirmQrisPaymentAndCheckout(); }"
+        class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
         <div x-show="showQrisModal" x-transition.scale.95 class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border border-gray-100 dark:border-slate-700">
             <h3 class="text-xl font-black text-gray-800 dark:text-white mb-2 uppercase tracking-tighter">Scan & Bayar</h3>
             <p class="text-sm text-gray-500 mb-8 font-medium">Apotek Sofya - QRIS Dinamis</p>
@@ -351,14 +358,7 @@
                 e.preventDefault(); 
                 @this.set('paymentMethod', @this.paymentMethod === 'cash' ? 'qris' : 'cash'); 
             }
-            if (e.key === 'Enter' && e.shiftKey) {
-                if (!document.querySelector('[x-show="showHoldModal"]').style.display && 
-                    !document.querySelector('[x-show="showRecallModal"]').style.display && 
-                    !document.querySelector('[x-show="showQrisModal"]').style.display) {
-                    e.preventDefault();
-                    @this.saveTransaction();
-                }
-            }
+            
         });
     </script>
 </div>

@@ -29,6 +29,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:owner,admin'])->group(function () {
         // Dashboard
         Route::get('/dashboard', \App\Livewire\Dashboard::class)->name('dashboard');
+
+        Route::get('/users', \App\Livewire\Users\Index::class)->name('users.index');
         
         // Laporan
         Route::get('/reports/sales', \App\Livewire\Reports\Sales::class)->name('reports.sales');
