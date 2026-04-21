@@ -21,6 +21,10 @@ class Create extends Component
     public $name = '';
     public $selling_price = '';
 
+    public function getSellingMurniProperty() 
+    {
+        return (int) preg_replace('/[^0-9]/', '', (string)$this->selling_price);
+    }
     public function save()
     {
         if (\Illuminate\Support\Facades\Auth::user()->role !== 'admin') {
@@ -31,7 +35,6 @@ class Create extends Component
             'unit_id' => 'required',
             'sku' => 'required|unique:products,sku', // SKU tidak boleh kembar
             'name' => 'required|min:3',
-            'selling_price' => 'required|numeric|min:0',
         ]);
 
         Product::create([
@@ -39,7 +42,7 @@ class Create extends Component
             'unit_id' => $this->unit_id,
             'sku' => $this->sku,
             'name' => $this->name,
-            'selling_price' => $this->selling_price,
+            'selling_price' => $this->sellingMurni,
             'is_active' => true // Default aktif
         ]);
 

@@ -398,34 +398,78 @@
                     <p class="text-4xl font-black text-indigo-600 dark:text-indigo-400 mb-6 font-mono text-center">Rp{{ number_format($this->total) }}</p>
                     
                     <div class="space-y-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+                        
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Uang Dibayar <span class="text-indigo-500">(F4)</span></label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <span class="text-gray-500 font-black">Rp</span>
-                                </div>
-                                <input type="text" 
-                                    x-ref="paymentInput"
-                                    wire:model.live.debounce.300ms="pembayaran" 
-                                    wire:keydown.enter.prevent="saveTransaction"
-                                    x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')"
-                                    class="w-full pl-12 p-4 bg-gray-50 dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-colors text-right font-black text-2xl text-gray-800 dark:text-white font-mono" placeholder="0">
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Metode Pembayaran</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button wire:click="$set('paymentMethod', 'cash')" 
+                                        class="py-2.5 rounded-xl text-xs font-bold transition-all border-2 flex flex-col items-center gap-1 {{ $paymentMethod === 'cash' ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300' : 'bg-white border-gray-100 text-gray-500 hover:border-gray-200 dark:bg-slate-800 dark:border-slate-700 dark:text-gray-400' }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                                    Tunai
+                                </button>
+                                <button wire:click="$set('paymentMethod', 'qris')" 
+                                        class="py-2.5 rounded-xl text-xs font-bold transition-all border-2 flex flex-col items-center gap-1 {{ $paymentMethod === 'qris' ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300' : 'bg-white border-gray-100 text-gray-500 hover:border-gray-200 dark:bg-slate-800 dark:border-slate-700 dark:text-gray-400' }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1a2 2 0 0 1 2 2v1"/><path d="M12 21v-1"/></svg>
+                                    QRIS
+                                </button>
+                                <button wire:click="$set('paymentMethod', 'debit')" 
+                                        class="py-2.5 rounded-xl text-xs font-bold transition-all border-2 flex flex-col items-center gap-1 {{ $paymentMethod === 'debit' ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300' : 'bg-white border-gray-100 text-gray-500 hover:border-gray-200 dark:bg-slate-800 dark:border-slate-700 dark:text-gray-400' }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                                    EDC/Debit
+                                </button>
                             </div>
                         </div>
 
-                        @php
-                            $isLunas = $this->kembalian >= 0 && $this->total > 0;
-                            $kembalianWarna = $isLunas ? 'emerald' : 'red';
-                        @endphp
+                        @if($paymentMethod === 'cash')
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Uang Tunai <span class="text-indigo-500">(F4)</span></label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 font-black">Rp</span>
+                                    </div>
+                                    <input type="text" 
+                                        x-ref="paymentInput"
+                                        wire:model.live.debounce.300ms="pembayaran" 
+                                        wire:keydown.enter.prevent="saveTransaction"
+                                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')"
+                                        class="w-full pl-12 p-4 bg-gray-50 dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-colors text-right font-black text-2xl text-gray-800 dark:text-white font-mono" placeholder="0">
+                                </div>
+                            </div>
 
-                        <div class="flex justify-between items-center p-4 bg-{{ $kembalianWarna }}-50 dark:bg-{{ $kembalianWarna }}-500/10 rounded-xl border border-{{ $kembalianWarna }}-200 dark:border-{{ $kembalianWarna }}-500/30">
-                            <span class="font-bold text-{{ $kembalianWarna }}-700 dark:text-{{ $kembalianWarna }}-400 text-sm">
-                                {{ $isLunas ? 'Kembalian' : 'Kurang Bayar' }}
-                            </span>
-                            <span class="font-black text-{{ $kembalianWarna }}-700 dark:text-{{ $kembalianWarna }}-400 text-xl font-mono">
-                                Rp{{ number_format(abs($this->kembalian)) }}
-                            </span>
-                        </div>
+                            @php
+                                $isLunas = $this->kembalian >= 0 && $this->total > 0;
+                                $kembalianWarna = $isLunas ? 'emerald' : 'red';
+                            @endphp
+
+                            <div class="flex justify-between items-center p-4 bg-{{ $kembalianWarna }}-50 dark:bg-{{ $kembalianWarna }}-500/10 rounded-xl border border-{{ $kembalianWarna }}-200 dark:border-{{ $kembalianWarna }}-500/30">
+                                <span class="font-bold text-{{ $kembalianWarna }}-700 dark:text-{{ $kembalianWarna }}-400 text-sm">
+                                    {{ $isLunas ? 'Kembalian' : 'Kurang Bayar' }}
+                                </span>
+                                <span class="font-black text-{{ $kembalianWarna }}-700 dark:text-{{ $kembalianWarna }}-400 text-xl font-mono">
+                                    Rp{{ number_format(abs($this->kembalian)) }}
+                                </span>
+                            </div>
+                        @else
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">No. Ref/Trace (EDC/QRIS) <span class="text-indigo-500">(F4)</span></label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                                    </div>
+                                    <input type="text" 
+                                        x-ref="paymentInput"
+                                        wire:model="paymentReference" 
+                                        wire:keydown.enter.prevent="saveTransaction"
+                                        class="w-full pl-12 p-4 bg-gray-50 dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-colors text-left font-black text-xl text-gray-800 dark:text-white" placeholder="Contoh: 83921038">
+                                </div>
+                            </div>
+                            
+                            @php $isLunas = true; @endphp 
+                            <div class="flex justify-between items-center p-4 bg-blue-50 dark:bg-blue-500/10 rounded-xl border border-blue-200 dark:border-blue-500/30">
+                                <span class="font-bold text-blue-700 dark:text-blue-400 text-sm">Sistem:</span>
+                                <span class="font-black text-blue-700 dark:text-blue-400 text-sm">Pembayaran Pas Otomatis</span>
+                            </div>
+                        @endif
                     </div>
 
                     <button wire:click="saveTransaction" 

@@ -32,9 +32,13 @@ class Edit extends Component
         $this->name = $product->name;
         $this->category_id = $product->category_id;
         $this->unit_id = $product->unit_id;
-        $this->selling_price = $product->selling_price;
+        $this->selling_price =number_format($product->selling_price, 0, ',', '.');
     }
 
+    public function getSellingMurniProperty() 
+    {
+        return (int) preg_replace('/[^0-9]/', '', (string)$this->selling_price);
+    }
     public function update()
     {
         // 3. Validasi ketat. Pengecekan unique SKU mengecualikan ID obat ini sendiri
@@ -43,7 +47,6 @@ class Edit extends Component
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'unit_id' => 'required|exists:units,id',
-            'selling_price' => 'required|numeric|min:0',
         ]);
 
         // 4. Eksekusi Update ke Database
@@ -53,7 +56,7 @@ class Edit extends Component
             'name' => $this->name,
             'category_id' => $this->category_id,
             'unit_id' => $this->unit_id,
-            'selling_price' => $this->selling_price,
+            'selling_price' => $this->sellingMurni,
         ]);
 
         session()->flash('success', 'Data Master Obat berhasil diperbarui!');

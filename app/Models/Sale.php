@@ -10,6 +10,7 @@ class Sale extends Model
     use Auditable;
     
     // TAMBAHAN: Masukkan 'status' dan 'void_reason' ke dalam fillable
+    // Cari bagian ini dan tambahkan dua baris di bawahnya
     protected $fillable = [
         'invoice_number', 
         'total_price', 
@@ -17,8 +18,10 @@ class Sale extends Model
         'kembalian', 
         'user_id', 
         'customer_id',
-        'status',          // <-- WAJIB ADA
-        'void_reason'      // <-- WAJIB ADA
+        'status',          
+        'void_reason',
+        'payment_method',     // <-- TAMBAHKAN INI
+        'payment_reference'   // <-- TAMBAHKAN INI
     ];
 
     // Relasi ke Kasir

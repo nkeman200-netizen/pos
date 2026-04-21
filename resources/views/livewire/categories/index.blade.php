@@ -2,8 +2,9 @@
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold dark:text-white">Manajemen Kategori</h2>
         @if(auth()->user()->role === 'admin')
-        <button wire:click="openModal" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold transition">
-            <i class="fas fa-plus mr-2"></i> Kategori Baru
+        <button wire:click="openModal" class="flex items-center  bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            Kategori Baru
         </button>
         @endif
     </div>

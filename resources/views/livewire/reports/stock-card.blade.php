@@ -1,6 +1,5 @@
 <div class="p-6 lg:p-8 bg-gray-50 dark:bg-slate-900 min-h-screen transition-colors duration-300 print:bg-white print:p-0">
     
-    @push('scripts')
     <style>
         @media print {
             @page { size: A4 portrait; margin: 1cm; }
@@ -13,7 +12,6 @@
             th, td { border: 1px solid #94a3b8 !important; padding: 8px !important; font-size: 11px !important; }
         }
     </style>
-    @endpush
 
     <div class="mb-8 no-print">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">

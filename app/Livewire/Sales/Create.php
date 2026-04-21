@@ -36,6 +36,8 @@ class Create extends Component
     public $hasOpenShift = false;
     public $startingCash = '';
     public $actualCash = ''; // <-- Untuk input uang fisik saat tutup kasir
+    public $paymentMethod = 'cash'; // Default selalu tunai
+    public $paymentReference = '';  // Untuk input nomor EDC / QRIS
 
     public function mount()
     {
@@ -325,32 +327,53 @@ class Create extends Component
             abort(403, 'Akses ditolak');
         }
 
-        if (empty($this->cart) || $this->pembayaranMurni < $this->total) {
-            session()->flash('error', 'Keranjang kosong atau uang pembayaran kurang!');
+        // Validasi Keranjang
+        if (empty($this->cart)) {
+            session()->flash('error', 'Keranjang kosong!');
+            return;
+        }
+
+        // Logika Uang: Jika Non-Tunai, Uang Dibayar OTOMATIS sama dengan Total (Kembalian 0)
+        $nominalDibayar = $this->paymentMethod === 'cash' ? $this->pembayaranMurni : $this->total;
+        $kembalianFinal = $this->paymentMethod === 'cash' ? $this->kembalian : 0;
+
+        if ($nominalDibayar < $this->total) {
+            session()->flash('error', 'Uang pembayaran kurang!');
+            return;
+        }
+
+        // Validasi Referensi Non-Tunai
+        if ($this->paymentMethod !== 'cash' && empty($this->paymentReference)) {
+            session()->flash('error', 'Nomor Referensi (EDC/QRIS) WAJIB diisi untuk pembayaran Non-Tunai!');
             return;
         }
 
         try {
             $createdSaleId = null;
-            $kembalianFinal = $this->kembalian; 
 
-            DB::transaction(function () use (&$createdSaleId) { 
+            DB::transaction(function () use (&$createdSaleId, $nominalDibayar, $kembalianFinal) { 
                 $sale = Sale::create([
-                    'invoice_number' => 'INV-' . date('ymdHis'), 
-                    'customer_id'    => $this->customerId ?: null,
-                    'user_id'        => Auth::id() ?? 1, 
-                    'total_price'    => $this->total, 
-                    'pembayaran'     => $this->pembayaranMurni, 
-                    'kembalian'      => $this->kembalian 
+                    'invoice_number'    => 'INV-' . date('ymdHis'), 
+                    'customer_id'       => $this->customerId ?: null,
+                    'user_id'           => Auth::id() ?? 1, 
+                    'total_price'       => $this->total, 
+                    'pembayaran'        => $nominalDibayar, 
+                    'kembalian'         => $kembalianFinal,
+                    'payment_method'    => $this->paymentMethod,
+                    'payment_reference' => $this->paymentMethod !== 'cash' ? $this->paymentReference : null,
                 ]);
 
                 $createdSaleId = $sale->id;
 
-                $openShift = CashierShift::where('user_id', Auth::id())->where('status', 'open')->first();
-                if ($openShift) {
-                    $openShift->increment('expected_cash', $this->total);
+                // Uang laci bertambah HANYA jika pembayarannya CASH (Tunai)
+                if ($this->paymentMethod === 'cash') {
+                    $openShift = CashierShift::where('user_id', Auth::id())->where('status', 'open')->first();
+                    if ($openShift) {
+                        $openShift->increment('expected_cash', $this->total);
+                    }
                 }
 
+                // Pengurangan Stok Batch (Tetap sama)
                 foreach ($this->cart as $item) { 
                     $sale->details()->create([
                         'product_id' => $item['product_id'],
@@ -388,7 +411,8 @@ class Create extends Component
                 'printUrl' => route('sales.show', $createdSaleId)
             ]);
             
-            $this->reset(['cart', 'customerId', 'pembayaran', 'searchQuery', 'qty']);
+            // Reset Semua State Kasir
+            $this->reset(['cart', 'customerId', 'pembayaran', 'searchQuery', 'qty', 'paymentMethod', 'paymentReference']);
             
         } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());

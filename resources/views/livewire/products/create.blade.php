@@ -14,7 +14,7 @@
     <div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
         
         <div class="bg-indigo-600 p-4 flex items-start gap-3">
-            <i data-lucide="info" class="w-5 h-5 text-indigo-200 mt-0.5"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
             <p class="text-indigo-100 text-sm font-medium leading-relaxed">
                 <strong class="text-white">Info Penting:</strong> Di form ini Anda hanya mendaftarkan profil obat. <br>
                 Untuk menambahkan <strong class="text-white">Stok, No. Batch, dan Expired Date</strong>, silakan lakukan melalui menu <b class="text-white">Stok Masuk (Purchases)</b> setelah obat ini disimpan.
@@ -28,7 +28,7 @@
                     <label for="sku" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">SKU / Barcode <span class="text-red-500">*</span></label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="barcode" class="w-4 h-4 text-gray-400 dark:text-gray-500"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-barcode-icon lucide-barcode"><path d="M3 5v14"/><path d="M8 5v14"/><path d="M12 5v14"/><path d="M17 5v14"/><path d="M21 5v14"/></svg>
                         </div>
                         <input type="text" id="sku" wire:model="sku" placeholder="Scan barcode kemasan..." 
                             class="w-full pl-10 p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-800 dark:text-white transition-colors text-sm font-mono">
@@ -76,7 +76,10 @@
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <span class="text-gray-500 dark:text-gray-400 text-sm font-bold">Rp</span>
                     </div>
-                    <input type="number" id="selling_price" wire:model="selling_price" min="0" placeholder="0"
+                    <input 
+                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')"
+                        type="text" id="selling_price" 
+                        wire:model="selling_price" min="0" placeholder="0"
                         class="w-full pl-12 p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-800 transition-colors text-sm text-right font-mono font-bold text-gray-800 dark:text-white">
                 </div>
                 <p class="text-xs text-gray-400 mt-1.5">Harga yang akan dikenakan ke pelanggan di kasir.</p>
@@ -85,7 +88,7 @@
 
             <div class="pt-6 mt-4 border-t border-gray-100 dark:border-slate-700 flex flex-col sm:flex-row gap-3">
                 <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex justify-center items-center gap-2">
-                    <i data-lucide="save" class="w-5 h-5"></i> Simpan Master Obat
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save-icon lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> Simpan Master Obat
                 </button>
                 <button type="button" wire:click="resetForm" class="px-8 py-3.5 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-gray-300 font-semibold rounded-xl transition-colors">
                     Reset Form

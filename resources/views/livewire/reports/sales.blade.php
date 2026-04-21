@@ -1,6 +1,5 @@
 <div class="p-6 lg:p-8 bg-gray-50 dark:bg-slate-900 min-h-screen transition-colors duration-300 print:bg-white print:p-0">
     
-    @push('scripts')
     <style>
         @media print {
             /* 1. Atur ukuran kertas wajib A4 dan beri jarak aman (margin) */
@@ -43,7 +42,6 @@
             th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
-    @endpush
 
     <div class="mb-8 no-print">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
