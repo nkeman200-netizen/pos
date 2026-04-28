@@ -7,10 +7,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS Apotek - Sofya Project</title>
-    
-    <script>
-        tailwind.config = { darkMode: 'class' }
-    </script>
 
     <script>
         function applyDarkMode() {
@@ -34,7 +30,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-200 antialiased transition-colors duration-300 flex h-screen overflow-hidden"><body class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-200 antialiased transition-colors duration-300 flex h-screen overflow-hidden">
+<body class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-200 antialiased transition-colors duration-300 flex h-screen overflow-hidden">
     @php $apotek = \App\Models\PharmacyProfile::first(); @endphp
 
     <aside class="bg-white dark:bg-slate-900 border-r border-gray-100 dark:border-slate-800 flex flex-col transition-all duration-300 z-20" :class="sidebarCollapsed ? 'w-20' : 'w-64'">
