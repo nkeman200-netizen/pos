@@ -31,6 +31,7 @@
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
         .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
     </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-200 antialiased transition-colors duration-300 flex h-screen overflow-hidden"><body class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-200 antialiased transition-colors duration-300 flex h-screen overflow-hidden">
