@@ -20,7 +20,7 @@
 
     <div class="no-print">
         <div class="mb-8">
-            <h2 class="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight flex items-center gap-2 text-red-600">
+            <h2 class="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
                 Retur Barang (Return to Vendor)
             </h2>
@@ -109,7 +109,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Qty Diretur <span class="text-red-500">(Max: {{ $maxQty }})</span></label>
-                                <input type="number" wire:model="qty" class="w-full p-2.5 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-500/50 rounded-xl outline-none focus:ring-2 focus:ring-red-500 dark:text-white text-lg font-black font-mono text-red-600 dark:text-red-400" min="1" max="{{ $maxQty }}" {{ !$batchId ? 'disabled' : '' }}>
+                                <input type="number" wire:model="qty" class="w-full p-2.5 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-500/50 rounded-xl outline-none focus:ring-2 focus:ring-red-500 dark:text-white text-lg font-black font-mono text-red-600" min="1" max="{{ $maxQty }}" {{ !$batchId ? 'disabled' : '' }}>
                                 @error('qty') <span class="text-xs font-bold text-red-500 mt-1">{{ $message }}</span> @enderror
                             </div>
                         </div>
