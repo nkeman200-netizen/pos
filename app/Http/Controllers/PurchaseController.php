@@ -9,7 +9,6 @@ class PurchaseController extends Controller
 {
     public function print($id)
     {
-        // Load purchase dengan relasi details, product, supplier, dan user
         $purchase = Purchase::with(['supplier', 'user', 'details.product'])->findOrFail($id);
         
         $pdf = Pdf::loadView('purchases.pdf', compact('purchase'));

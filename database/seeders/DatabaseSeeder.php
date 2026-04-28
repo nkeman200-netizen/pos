@@ -24,7 +24,6 @@ class DatabaseSeeder extends Seeder
             $supplierData
         );
         
-        // 2. Master Data: Kategori (Golongan Obat)
         $categories = [
             ['name' => 'Obat Bebas'],
             ['name' => 'Obat Bebas Terbatas'],
@@ -36,7 +35,6 @@ class DatabaseSeeder extends Seeder
             Category::firstOrCreate($cat);
         }
 
-        // 3. Master Data: Satuan Kemasan
         $units = [
             ['name' => 'Strip', 'short_name' => 'str'],
             ['name' => 'Botol', 'short_name' => 'btl'],
@@ -49,27 +47,26 @@ class DatabaseSeeder extends Seeder
             Unit::firstOrCreate($unit);
         }
 
-        // 4. Dummy Data: Produk (Profil Obat)
         $products = [
             [
-                'category_id' => 1, // Obat Bebas
-                'unit_id' => 1,     // Strip
+                'category_id' => 1,
+                'unit_id' => 1, 
                 'sku' => '899123456001',
                 'name' => 'Paracetamol 500mg',
                 'selling_price' => 5000,
                 'is_active' => true,
             ],
             [
-                'category_id' => 3, // Obat Keras
-                'unit_id' => 1,     // Strip
+                'category_id' => 3,
+                'unit_id' => 1,  
                 'sku' => '899123456002',
                 'name' => 'Amoxicillin 500mg',
                 'selling_price' => 12000,
                 'is_active' => true,
             ],
             [
-                'category_id' => 4, // Vitamin
-                'unit_id' => 2,     // Botol
+                'category_id' => 4,
+                'unit_id' => 2,   
                 'sku' => '899123456003',
                 'name' => 'Imboost Force Sirup 60ml',
                 'selling_price' => 45000,
@@ -80,26 +77,21 @@ class DatabaseSeeder extends Seeder
         foreach ($products as $prod) {
             $product = Product::firstOrCreate(['sku' => $prod['sku']], $prod);
 
-            // 5. Dummy Data: Product Batches (Stok & Expired Date)
-            // KITA BUAT 2 BATCH UNTUK SETIAP OBAT UNTUK TESTING FEFO!
-            
-            // Batch Pertama: Expired dekat (6 bulan lagi)
             ProductBatch::firstOrCreate([
                 'product_id' => $product->id,
                 'batch_number' => 'BATCH-A-' . rand(1000, 9999),
             ], [
                 'expired_date' => now()->addMonths(6)->format('Y-m-d'),
-                'purchase_price' => $product->selling_price * 0.7, // Modal 70% dari harga jual
+                'purchase_price' => $product->selling_price * 0.7, 
                 'stock' => 50,
             ]);
 
-            // Batch Kedua: Expired masih lama (12 bulan lagi)
             ProductBatch::firstOrCreate([
                 'product_id' => $product->id,
                 'batch_number' => 'BATCH-B-' . rand(1000, 9999),
             ], [
                 'expired_date' => now()->addMonths(12)->format('Y-m-d'),
-                'purchase_price' => $product->selling_price * 0.75, // Modal fluktuatif
+                'purchase_price' => $product->selling_price * 0.75, 
                 'stock' => 100,
             ]);
         }

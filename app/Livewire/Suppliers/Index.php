@@ -25,7 +25,6 @@ class Index extends Component
             abort(403, 'Akses ditolak');
         }
         $supplier = Supplier::findOrFail($id);
-        // Opsional: Cek dulu apakah supplier ini sudah punya transaksi Purchase
         if ($supplier->purchases()->count() > 0) {
             session()->flash('error', 'Supplier tidak bisa dihapus karena sudah memiliki riwayat transaksi.');
             return;

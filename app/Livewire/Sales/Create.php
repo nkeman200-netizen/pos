@@ -273,21 +273,16 @@ class Create extends Component
 
     private function makeDynamicQRIS($fullPayload, $amount)
     {
-        // 1. Buang 8 karakter terakhir (Tag '6304' + 4 digit CRC lama) secara bersih
         $payload = substr($fullPayload, 0, -8); 
         
-        // 2. Ubah indikator menjadi dinamis (010211 -> 010212)
         $payload = str_replace('010211', '010212', $payload); 
         
-        // 3. Suntikkan Tag 54 (Amount) tepat sebelum CRC
         $valAmount = (string) $amount;
         $lenAmount = str_pad(strlen($valAmount), 2, '0', STR_PAD_LEFT);
         $payload .= "54" . $lenAmount . $valAmount;
         
-        // 4. Pasang kembali penutup Tag 63 (CRC) di bagian ekor
         $payload .= "6304"; 
         
-        // 5. Hitung CRC16 yang baru
         $crc = $this->crc16($payload); 
         return $payload . $crc;
     }
@@ -330,10 +325,8 @@ class Create extends Component
         $this->hasOpenShift = true;
     }
 
-    // Tambahkan 2 metode ini di dalam class Create
     public function closeShift()
     {
-        // Langsung bersihkan titik/karakter non-angka di sini
         $nominalFisik = (int) preg_replace('/[^0-9]/', '', (string) $this->actualCash);
 
         if ($this->actualCash === '' || $nominalFisik < 0) {
@@ -351,7 +344,6 @@ class Create extends Component
             ]);
         }
 
-        // Paksa Kasir Keluar (Logout) setelah shift ditutup
         Auth::logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
@@ -368,7 +360,7 @@ class Create extends Component
             'user_id' => Auth::id(),
             'customer_id' => $this->customerId ?: null,
             'cart_data' => $this->cart,
-            'notes' => $this->holdNote,
+            'reference_notes' => $this->holdNote,
         ]);
         
         $this->reset(['cart', 'customerId', 'holdNote', 'pembayaran']);

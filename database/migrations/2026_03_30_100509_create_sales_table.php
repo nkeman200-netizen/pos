@@ -13,13 +13,8 @@ return new class extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            // Nomor invoice unik, misal: INV-20231012-0001
             $table->string('invoice_number')->unique();
-            
-            // Relasi ke Pelanggan (nullable karena bisa saja beli tanpa member/guest)
             $table->foreignId('customer_id')->nullable()->constrained()->onDelete('set null');
-            // 3. Relasi ke Kasir (Wajib: harus tahu siapa yang jualin)
-            // Pastikan tabel 'users' sudah ada sebelum menjalankan ini
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->bigInteger('total_price')->default(0);
             $table->bigInteger('pembayaran')->default(0);

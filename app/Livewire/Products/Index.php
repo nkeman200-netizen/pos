@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Products;
 
+use App\Models\Category;
 use App\Models\Product;
+use App\Models\Unit;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -16,11 +18,28 @@ class Index extends Component
     #[Title('Master Data Obat')]
 
     public $search = '';
+    public $sortColumn = 'id';
+    public $sortDirection = 'desc';
 
-    // Reset halaman ke 1 setiap kali user mengetik di kotak pencarian
-    public function updatingSearch()
+    public $filterCategory = '';
+    public $filterUnit = '';
+    public $filterStock = '';
+
+    public function updated($property)
     {
-        $this->resetPage();
+        if (in_array($property, ['search', 'filterCategory', 'filterUnit', 'filterStock'])) {
+            $this->resetPage();
+        }
+    }
+
+    public function sortBy($column)
+    {
+        if ($this->sortColumn === $column) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortColumn = $column;
+            $this->sortDirection = 'asc';
+        }
     }
 
     public function delete($id)
@@ -30,7 +49,6 @@ class Index extends Component
         }
         $product = Product::findOrFail($id);
         
-        // Proteksi: Jangan hapus kalau sudah ada transaksi/batch
         if ($product->batches()->count() > 0) {
             session()->flash('error', 'Gagal! Obat ini sudah memiliki riwayat stok/batch. Cukup nonaktifkan saja.');
             return;
@@ -42,13 +60,38 @@ class Index extends Component
 
     public function render()
     {
-        // Gunakan 'with' untuk memuat relasi (Eager Loading) agar loading halaman sangat cepat
-        $products = Product::with(['category', 'unit'])
-            ->where('name', 'like', '%' . $this->search . '%')
-            ->orWhere('sku', 'like', '%' . $this->search . '%')
-            ->orderBy('id', 'desc')
-            ->paginate(10);
+        $query = Product::with(['category', 'unit'])
+            ->withSum('batches', 'stock')
+            ->when($this->search, function ($q) {
+                $q->where(function($subQuery) {
+                    $subQuery->where('name', 'like', '%' . $this->search . '%')
+                            ->orWhere('sku', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->when($this->filterCategory, function ($q) {
+                $q->where('category_id', $this->filterCategory);
+            })
+            ->when($this->filterUnit, function ($q) {
+                $q->where('unit_id', $this->filterUnit);
+            })
+            ->when($this->filterStock, function ($q) {
+                if ($this->filterStock === 'tersedia') {
+                    $q->whereHas('batches', function($batchQuery) {
+                        $batchQuery->where('stock', '>', 0);
+                    });
+                } elseif ($this->filterStock === 'habis') {
+                    $q->whereDoesntHave('batches', function($batchQuery) {
+                        $batchQuery->where('stock', '>', 0);
+                    });
+                }
+            });
 
-        return view('livewire.products.index', compact('products'));
+        $products = $query->orderBy($this->sortColumn, $this->sortDirection)->paginate(10);
+
+        return view('livewire.products.index', [
+            'products' => $products,
+            'categories' => Category::all(),
+            'units' => Unit::all(),
+        ]);
     }
 }

@@ -20,36 +20,36 @@ class Edit extends Component
     public $category_id;
     public $unit_id;
     public $selling_price;
+    public $min_stock; 
 
     public function mount($id)
     {
-        // 1. Tarik data obat berdasarkan ID yang dilempar dari URL
         $product = Product::findOrFail($id);
         
-        // 2. Isi ke property agar muncul di form Blade
         $this->product_id = $product->id;
         $this->sku = $product->sku;
         $this->name = $product->name;
         $this->category_id = $product->category_id;
         $this->unit_id = $product->unit_id;
-        $this->selling_price =number_format($product->selling_price, 0, ',', '.');
+        $this->selling_price = number_format($product->selling_price, 0, ',', '.');
+        $this->min_stock = $product->min_stock; 
     }
 
     public function getSellingMurniProperty() 
     {
         return (int) preg_replace('/[^0-9]/', '', (string)$this->selling_price);
     }
+
     public function update()
     {
-        // 3. Validasi ketat. Pengecekan unique SKU mengecualikan ID obat ini sendiri
         $this->validate([
             'sku' => 'required|unique:products,sku,' . $this->product_id,
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'unit_id' => 'required|exists:units,id',
+            'min_stock' => 'required|integer|min:0',
         ]);
 
-        // 4. Eksekusi Update ke Database
         $product = Product::findOrFail($this->product_id);
         $product->update([
             'sku' => $this->sku,
@@ -57,6 +57,7 @@ class Edit extends Component
             'category_id' => $this->category_id,
             'unit_id' => $this->unit_id,
             'selling_price' => $this->sellingMurni,
+            'min_stock' => $this->min_stock, 
         ]);
 
         session()->flash('success', 'Data Master Obat berhasil diperbarui!');

@@ -3,6 +3,7 @@
 namespace App\Livewire\Reports;
 
 use App\Models\Product;
+use App\Models\ProductBatch; 
 use App\Models\PurchaseItem;
 use App\Models\SaleItem;
 use Carbon\Carbon;
@@ -15,6 +16,9 @@ class StockCard extends Component
     #[Layout('layouts.app')]
     #[Title('Kartu Stok Obat')]
 
+    public $searchQuery = '';
+    public $searchResults = [];
+    
     public $productId;
     public $startDate;
     public $endDate;
@@ -25,16 +29,42 @@ class StockCard extends Component
         $this->endDate = Carbon::now()->format('Y-m-d');
     }
 
+    public function updatedSearchQuery()
+    {
+        if (strlen($this->searchQuery) >= 2) {
+            $this->searchResults = Product::with('unit')
+                ->where('name', 'like', '%' . $this->searchQuery . '%')
+                ->orWhere('sku', 'like', '%' . $this->searchQuery . '%')
+                ->where('is_active', true)
+                ->take(5)
+                ->get();
+        } else {
+            $this->searchResults = [];
+        }
+    }
+
+    public function selectProduct($id)
+    {
+        $this->productId = $id;
+        $this->searchQuery = ''; 
+        $this->searchResults = [];
+    }
+
     public function render()
     {
         $mutasi = collect();
         $product = null;
         $stokAwal = 0;
+        $activeBatches = [];
 
         if ($this->productId) {
             $product = Product::with('unit')->find($this->productId);
 
-            // 1. Stok Masuk
+            
+            $activeBatches = ProductBatch::where('product_id', $this->productId)
+                ->where('stock', '>', 0)
+                ->orderBy('expired_date', 'asc') 
+                ->get();
             $masuk = PurchaseItem::with('purchase')
                 ->where('product_id', $this->productId)
                 ->whereBetween('created_at', [
@@ -46,19 +76,18 @@ class StockCard extends Component
                     return [
                         'tanggal' => $item->created_at,
                         'keterangan' => 'Stok Masuk (Pembelian)',
-                        'referensi' => $item->purchase->purchase_number,
-                        'batch' => $item->batch_number,
+                        'referensi' => $item->purchase->purchase_number ?? '-',
+                        'batch' => '-', 
                         'masuk' => $item->quantity,
                         'keluar' => 0,
                         'tipe' => 'masuk'
                     ];
                 });
 
-            // 2. Stok Keluar (Pastikan status transaksinya bukan VOID)
             $keluar = SaleItem::with('sale')
                 ->where('product_id', $this->productId)
                 ->whereHas('sale', function($query) {
-                    $query->where('status', '!=', 'void'); // <-- KUNCI PENTING
+                    $query->where('status', '!=', 'void');
                 })
                 ->whereBetween('created_at', [
                     Carbon::parse($this->startDate)->startOfDay(),
@@ -69,7 +98,7 @@ class StockCard extends Component
                     return [
                         'tanggal' => $item->created_at,
                         'keterangan' => 'Stok Keluar (Penjualan)',
-                        'referensi' => $item->sale->invoice_number,
+                        'referensi' => $item->sale->invoice_number ?? '-',
                         'batch' => '-', 
                         'masuk' => 0,
                         'keluar' => $item->quantity,
@@ -79,7 +108,6 @@ class StockCard extends Component
 
             $mutasi = $masuk->concat($keluar)->sortBy('tanggal');
 
-            // Hitung Stok Awal (Pastikan juga tidak menghitung void)
             $masukSebelum = PurchaseItem::where('product_id', $this->productId)
                 ->where('created_at', '<', Carbon::parse($this->startDate)->startOfDay())
                 ->sum('quantity');
@@ -95,10 +123,10 @@ class StockCard extends Component
         }
 
         return view('livewire.reports.stock-card', [
-            'products' => Product::orderBy('name')->get(),
             'product' => $product,
             'mutasi' => $mutasi,
-            'stokAwal' => $stokAwal
+            'stokAwal' => $stokAwal,
+            'activeBatches' => $activeBatches 
         ]);
     }
 }

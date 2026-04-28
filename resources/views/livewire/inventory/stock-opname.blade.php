@@ -32,15 +32,42 @@
                 <form wire:submit.prevent="save" class="space-y-5">
                     
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase">1. Pilih Obat</label>
-                        <select wire:model.live="productId" class="w-full p-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold">
-                            <option value="">-- Pilih Obat --</option>
-                            @foreach($products as $p)
-                                <option value="{{ $p->id }}">{{ $p->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('productId') <span class="text-xs font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
-                    </div>
+                            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Pilih Obat yang Akan Diopname</label>
+                            
+                            @if($productId)
+                                <div class="flex items-center justify-between p-2.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 rounded-xl">
+                                    <div class="font-bold text-indigo-700 dark:text-indigo-400 text-sm">{{ $productName }}</div>
+                                    <button type="button" wire:click="clearProduct" class="p-1 bg-white dark:bg-slate-800 text-gray-400 hover:text-indigo-500 rounded-md transition-colors shadow-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                    </button>
+                                </div>
+                            @else
+                                <div class="relative w-full">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                    </div>
+                                    <input type="text" wire:model.live.debounce.300ms="searchProduct" placeholder="Ketik nama atau SKU obat..." 
+                                        class="w-full pl-10 p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white text-sm font-medium transition-all shadow-inner">
+                                    
+                                    @if(!empty($searchResults))
+                                        <div class="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl shadow-2xl overflow-hidden">
+                                            @foreach($searchResults as $res)
+                                                <div wire:click="selectProduct({{ $res->id }}, '{{ addslashes($res->name) }}')" class="p-3 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 cursor-pointer border-b border-gray-50 dark:border-slate-700/50 last:border-0 transition-colors group">
+                                                    <div class="font-bold text-gray-800 dark:text-gray-200 text-sm group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ $res->name }}</div>
+                                                    <div class="text-[10px] text-gray-400 font-mono mt-0.5">{{ $res->sku }}</div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @elseif(strlen($searchProduct) >= 2)
+                                        <div class="absolute z-50 w-full mt-1 p-3 text-center text-xs font-bold text-gray-400 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl shadow-lg">
+                                            Obat belum pernah memiliki riwayat batch/stok.
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                            
+                            @error('productId') <span class="text-xs font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
+                        </div>
 
                     <div>
                         <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase">2. Pilih Batch (Nomor Produksi)</label>

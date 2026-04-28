@@ -27,7 +27,6 @@ class PurchaseSeeder extends Seeder
 
         foreach ($productsToBuy as $product) {
             $qty = 100;
-            // Ambil harga beli langsung dari properti produk yang bener
             $costPrice = $product->purchase_price; 
             $subtotal = $qty * $costPrice;
 

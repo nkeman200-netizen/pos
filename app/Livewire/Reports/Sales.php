@@ -5,6 +5,7 @@ namespace App\Livewire\Reports;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -17,6 +18,7 @@ class Sales extends Component
 
     public $startDate;
     public $endDate;
+    public $frequency = 'daily'; 
 
     public function mount()
     {
@@ -26,19 +28,17 @@ class Sales extends Component
 
     public function render()
     {
-        // 1. Ambil HANYA transaksi yang TIDAK VOID
+        $start = Carbon::parse($this->startDate)->startOfDay();
+        $end = Carbon::parse($this->endDate)->endOfDay();
+
         $sales = Sale::with(['user', 'customer', 'details.product.batches'])
-            ->where('status', '!=', 'void') // <-- KUNCI PENTING
-            ->whereBetween('created_at', [
-                Carbon::parse($this->startDate)->startOfDay(),
-                Carbon::parse($this->endDate)->endOfDay()
-            ])
+            ->where('status', '!=', 'void')
+            ->whereBetween('created_at', [$start, $end])
             ->latest()
             ->get();
 
         $totalOmzet = $sales->sum('total_price');
         $totalTransaksi = $sales->count();
-        
         $totalLaba = 0;
         $totalItemTerjual = 0;
 
@@ -46,30 +46,79 @@ class Sales extends Component
             foreach ($sale->details as $item) {
                 $totalItemTerjual += $item->quantity;
                 $hargaModal = $item->product->batches->avg('purchase_price') ?? 0;
-                $labaPerItem = ($item->unit_price - $hargaModal) * $item->quantity;
-                $totalLaba += $labaPerItem;
+                $totalLaba += ($item->unit_price - $hargaModal) * $item->quantity;
             }
         }
 
         $marginPersen = $totalOmzet > 0 ? ($totalLaba / $totalOmzet) * 100 : 0;
 
-        // 3. Top Produk juga JANGAN hitung yang Void
         $topProducts = SaleItem::query()
             ->join('products', 'sale_items.product_id', '=', 'products.id')
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
-            ->select('products.name', DB::raw('SUM(sale_items.quantity) as total_qty'), DB::raw('SUM(sale_items.subtotal) as total_revenue'))
-            ->where('sales.status', '!=', 'void') // <-- KUNCI PENTING
-            ->whereBetween('sales.created_at', [
-                Carbon::parse($this->startDate)->startOfDay(),
-                Carbon::parse($this->endDate)->endOfDay()
-            ])
+            ->select('products.name', DB::raw('SUM(sale_items.quantity) as total_qty'))
+            ->where('sales.status', '!=', 'void')
+            ->whereBetween('sales.created_at', [$start, $end])
             ->groupBy('products.id', 'products.name')
             ->orderByDesc('total_qty')
             ->take(5)
             ->get();
 
+        $reportTable = collect();
+
+        if ($this->frequency === 'detail') {
+            $reportTable = $sales;
+        } elseif ($this->frequency === 'daily') {
+            $period = CarbonPeriod::create($start, $end);
+            $groupedSales = $sales->groupBy(fn($s) => $s->created_at->format('Y-m-d'));
+
+            foreach ($period as $date) {
+                $dateStr = $date->format('Y-m-d');
+                $daySales = $groupedSales->get($dateStr, collect());
+
+                $dayOmzet = $daySales->sum('total_price');
+                $dayLaba = 0;
+                foreach ($daySales as $ds) {
+                    foreach ($ds->details as $item) {
+                        $modal = $item->product->batches->avg('purchase_price') ?? 0;
+                        $dayLaba += ($item->unit_price - $modal) * $item->quantity;
+                    }
+                }
+
+                $reportTable->push([
+                    'label' => $date->translatedFormat('l, d M Y'),
+                    'transaksi' => $daySales->count(),
+                    'omzet' => $dayOmzet,
+                    'laba' => $dayLaba
+                ]);
+            }
+        } elseif ($this->frequency === 'monthly') {
+            $period = CarbonPeriod::create($start->startOfMonth(), '1 month', $end->startOfMonth());
+            $groupedSales = $sales->groupBy(fn($s) => $s->created_at->format('Y-m'));
+
+            foreach ($period as $date) {
+                $monthStr = $date->format('Y-m');
+                $monthSales = $groupedSales->get($monthStr, collect());
+
+                $monthOmzet = $monthSales->sum('total_price');
+                $monthLaba = 0;
+                foreach ($monthSales as $ms) {
+                    foreach ($ms->details as $item) {
+                        $modal = $item->product->batches->avg('purchase_price') ?? 0;
+                        $monthLaba += ($item->unit_price - $modal) * $item->quantity;
+                    }
+                }
+
+                $reportTable->push([
+                    'label' => $date->translatedFormat('F Y'),
+                    'transaksi' => $monthSales->count(),
+                    'omzet' => $monthOmzet,
+                    'laba' => $monthLaba
+                ]);
+            }
+        }
+
         return view('livewire.reports.sales', [
-            'sales' => $sales,
+            'reportTable' => $reportTable,
             'totalOmzet' => $totalOmzet,
             'totalTransaksi' => $totalTransaksi,
             'totalLaba' => $totalLaba,

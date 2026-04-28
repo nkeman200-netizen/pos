@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('purchase_orders', function (Blueprint $table) {
             $table->id();
-            $table->string('po_number')->unique(); // Nomor unik misal: PO-20260415-001
+            $table->string('po_number')->unique(); 
             $table->foreignId('supplier_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained('users'); // Apoteker yg bikin PO
-            $table->date('order_date'); // Tanggal pesan
-            $table->date('expected_date')->nullable(); // Tanggal estimasi barang datang
-            $table->enum('status', ['pending', 'received', 'cancelled','ordered'])->default('pending'); // Status pesanan
-            $table->integer('total_amount')->default(0); // Total estimasi harga
-            $table->text('notes')->nullable(); // Catatan tambahan buat PBF
+            $table->foreignId('user_id')->constrained('users'); 
+            $table->date('order_date'); 
+            $table->date('expected_date')->nullable();
+            $table->enum('status', ['pending', 'received', 'cancelled','ordered'])->default('pending');
+            $table->integer('total_amount')->default(0); 
+            $table->text('notes')->nullable(); 
             $table->timestamps();
         });
     }

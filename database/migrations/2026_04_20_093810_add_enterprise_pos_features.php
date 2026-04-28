@@ -8,18 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // 1. Tambah PIN di Users
         Schema::table('users', function (Blueprint $table) {
             $table->string('pin', 6)->nullable()->after('password')->comment('PIN untuk Fast Login Kasir');
         });
 
-        // 2. Tambah Status & Void Reason di Sales
         Schema::table('sales', function (Blueprint $table) {
             $table->enum('status', ['completed', 'void'])->default('completed')->after('kembalian');
             $table->string('void_reason')->nullable()->after('status');
         });
 
-        // 3. Tabel Baru: Cashier Shifts (Manajemen Kasir)
         Schema::create('cashier_shifts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
@@ -32,7 +29,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 4. Tabel Baru: Held Transactions (Tahan Transaksi / F6)
         Schema::create('held_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');

@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('purchase_order_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
-            $table->integer('quantity'); // Jumlah yg dipesan
-            $table->integer('purchase_price'); // Harga estimasi
+            $table->integer('quantity'); 
+            $table->integer('purchase_price');
             $table->integer('subtotal');
             $table->timestamps();
         });

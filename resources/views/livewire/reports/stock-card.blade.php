@@ -14,116 +14,176 @@
     </style>
 
     <div class="mb-8 no-print">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
             <div>
-                <h2 class="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight text-indigo-600">Kartu Stok Obat</h2>
+                <h2 class="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight">Kartu Stok Obat</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">Lacak riwayat mutasi masuk dan keluar setiap produk</p>
             </div>
-            @if($productId)
-            <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 transition shadow-md font-bold text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
-                Cetak Kartu Stok
-            </button>
-            @endif
+            
+            <div class="flex items-center gap-2 bg-white dark:bg-slate-800 p-1.5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
+                <input type="date" wire:model.live="startDate" class="px-3 py-2 text-sm font-bold bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700 dark:text-white transition-colors [color-scheme:light] dark:[color-scheme:dark]">
+                
+                <span class="text-gray-400 font-bold text-sm px-1">s/d</span>
+                
+                <input type="date" wire:model.live="endDate" class="px-3 py-2 text-sm font-bold bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700 dark:text-white transition-colors [color-scheme:light] dark:[color-scheme:dark]">
+            </div>
         </div>
 
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-                <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Pilih Obat</label>
-                <select wire:model.live="productId" class="w-full p-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold shadow-sm">
-                    <option value="">-- Cari Nama Obat --</option>
-                    @foreach($products as $p)
-                        <option value="{{ $p->id }}">{{ $p->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="md:col-span-2 flex items-end gap-4">
-                <div class="flex-1">
-                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Periode</label>
-                    <div class="flex items-center gap-3">
-                        <input type="date" wire:model.live="startDate" class="w-full p-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition text-sm font-bold shadow-sm [color-scheme:light] dark:[color-scheme:dark]">
-                        
-                        <span class="text-gray-400 font-bold">s/d</span>
-                        
-                        <input type="date" wire:model.live="endDate" class="w-full p-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition text-sm font-bold shadow-sm [color-scheme:light] dark:[color-scheme:dark]">
-                    </div>
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700 relative w-full lg:w-1/2">
+            <label class="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Cari Master Obat</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 </div>
+                <input type="text" wire:model.live.debounce.300ms="searchQuery" placeholder="Ketik nama obat atau scan SKU..." 
+                    class="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-gray-800 dark:text-white transition-colors text-sm shadow-inner">
             </div>
+
+            @if(!empty($searchQuery))
+                <div class="absolute z-50 w-full mt-2 left-0 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 shadow-2xl rounded-xl overflow-hidden max-h-60 overflow-y-auto">
+                    @forelse($searchResults as $res)
+                        <div wire:click="selectProduct({{ $res->id }})" class="p-4 border-b border-gray-50 dark:border-slate-700/50 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 cursor-pointer transition flex justify-between items-center group">
+                            <div>
+                                <div class="font-bold text-gray-800 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">{{ $res->name }}</div>
+                                <div class="text-xs text-gray-500 font-mono mt-1 bg-gray-100 dark:bg-slate-700 inline-block px-2 py-0.5 rounded">SKU: {{ $res->sku }}</div>
+                            </div>
+                            <span class="text-xs font-bold text-white bg-indigo-600 px-3 py-1.5 rounded-lg group-hover:bg-indigo-700 transition shadow-sm">Pilih</span>
+                        </div>
+                    @empty
+                        <div class="p-5 text-center text-gray-500 text-sm font-medium">Obat tidak ditemukan.</div>
+                    @endforelse
+                </div>
+            @endif
         </div>
     </div>
 
-    <div id="area-laporan" class="space-y-6">
-        @if($productId)
-            <div class="hidden print:block text-center mb-8 pb-4 border-b-4 border-double border-gray-800">
-                <h1 class="text-2xl font-black uppercase">KARTU STOK PERSEDIAAN OBAT</h1>
-                <p class="text-sm font-bold italic mt-1 uppercase tracking-widest">{{ $product->name }}</p>
-                <p class="text-xs mt-1">Periode: {{ date('d M Y', strtotime($startDate)) }} - {{ date('d M Y', strtotime($endDate)) }}</p>
+    <div id="area-laporan">
+        @if($product)
+            <div class="mb-6 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 p-6 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm relative overflow-hidden">
+                <div class="absolute right-0 top-0 opacity-5 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                </div>
+                
+                <div class="relative z-10">
+                    <div class="flex items-center gap-2 mb-1.5">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest bg-indigo-50 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">{{ $product->category->name ?? 'Obat' }}</span>
+                        <span class="text-xs font-bold text-gray-400 font-mono">SKU: {{ $product->sku }}</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-gray-800 dark:text-gray-100">{{ $product->name }}</h3>
+                </div>
+                
+                <div class="relative z-10 text-left sm:text-right w-full sm:w-auto flex sm:block justify-between items-center">
+                    <div class="no-print mb-0 sm:mb-2 order-2 sm:order-1">
+                        <button onclick="window.print()" class="px-4 py-2 bg-gray-50 hover:bg-gray-100 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-bold rounded-lg shadow-sm border border-gray-200 dark:border-slate-600 transition flex items-center gap-2 text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                            Cetak
+                        </button>
+                    </div>
+                    <div class="order-1 sm:order-2">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Stok Aktif</p>
+                        <p class="text-xl font-black text-indigo-600 dark:text-indigo-400">{{ $product->stock ?? 0 }} <span class="text-sm text-gray-500">{{ $product->unit->short_name ?? 'Pcs' }}</span></p>
+                    </div>
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 no-print">
-                <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white relative overflow-hidden">
-                    <p class="text-[10px] font-bold uppercase opacity-80 mb-1">Stok Awal Periode</p>
-                    <h3 class="text-2xl font-black">{{ $stokAwal }} <span class="text-sm font-medium">{{ $product->unit->short_name ?? 'Pcs' }}</span></h3>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="absolute -right-2 -bottom-2 opacity-20 w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+                
+                <div class="xl:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden shadow-sm">
+                    <div class="p-5 bg-gray-50/80 dark:bg-slate-900/50 border-b border-gray-100 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div>
+                            <h4 class="font-black text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                                Buku Mutasi Barang
+                            </h4>
+                        </div>
+                        <div class="px-3 py-1.5 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm flex items-center gap-2">
+                            <span class="text-xs text-gray-500 dark:text-gray-400 font-bold">Stok Awal:</span>
+                            <span class="text-sm font-black text-gray-800 dark:text-gray-100">{{ $stokAwal }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left border-collapse">
+                            <thead class="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-50 dark:bg-slate-900/50 border-b border-gray-100 dark:border-slate-700 font-black tracking-wider">
+                                <tr>
+                                    <th class="px-5 py-4 w-32">Tanggal</th>
+                                    <th class="px-5 py-4">Referensi / Keterangan</th>
+                                    <th class="px-5 py-4 text-center bg-emerald-50/50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">Masuk</th>
+                                    <th class="px-5 py-4 text-center bg-red-50/50 dark:bg-red-500/10 text-red-700 dark:text-red-400">Keluar</th>
+                                    <th class="px-5 py-4 text-center text-indigo-700 dark:text-indigo-400">Sisa Stok</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-slate-700/50">
+                                @php $runningBalance = $stokAwal; @endphp
+                                @forelse($mutasi as $m)
+                                    @php
+                                        $runningBalance += $m['masuk'];
+                                        $runningBalance -= $m['keluar'];
+                                    @endphp
+                                    <tr class="hover:bg-gray-50/80 dark:hover:bg-slate-700/30 transition-colors">
+                                        <td class="px-5 py-4 font-bold text-gray-600 dark:text-gray-400 text-xs">
+                                            {{ \Carbon\Carbon::parse($m['tanggal'])->format('d/m/Y') }}<br>
+                                            <span class="font-normal text-gray-400">{{ \Carbon\Carbon::parse($m['tanggal'])->format('H:i') }}</span>
+                                        </td>
+                                        <td class="px-5 py-4">
+                                            <div class="font-black text-gray-800 dark:text-gray-200 text-xs mb-0.5">{{ $m['referensi'] }}</div>
+                                            <div class="text-[11px] text-gray-500 font-medium">{{ $m['keterangan'] }}</div>
+                                        </td>
+                                        <td class="px-5 py-4 text-center font-black text-emerald-600 dark:text-emerald-400">{{ $m['masuk'] > 0 ? '+'.$m['masuk'] : '-' }}</td>
+                                        <td class="px-5 py-4 text-center font-black text-red-500 dark:text-red-400">{{ $m['keluar'] > 0 ? '-'.$m['keluar'] : '-' }}</td>
+                                        <td class="px-5 py-4 text-center font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-500/5">{{ $runningBalance }}</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="5" class="px-5 py-16 text-center text-gray-400 font-bold text-sm">Tidak ada transaksi pada periode ini</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Total Masuk</p>
-                    <h3 class="text-2xl font-black text-emerald-600">{{ $mutasi->where('tipe', 'masuk')->sum('masuk') }}</h3>
-                </div>
-                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Total Keluar</p>
-                    <h3 class="text-2xl font-black text-red-600">{{ $mutasi->where('tipe', 'keluar')->sum('keluar') }}</h3>
-                </div>
-                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Saldo Akhir</p>
-                    <h3 class="text-2xl font-black text-indigo-600">{{ $stokAwal + $mutasi->where('tipe', 'masuk')->sum('masuk') - $mutasi->where('tipe', 'keluar')->sum('keluar') }}</h3>
-                </div>
-            </div>
 
-            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm overflow-hidden">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-gray-50 dark:bg-slate-900/50 text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-slate-700 font-black">
-                        <tr>
-                            <th class="px-5 py-4 w-32">Tanggal</th>
-                            <th class="px-5 py-4">Keterangan / Ref</th>
-                            <th class="px-5 py-4 text-center">Batch</th>
-                            <th class="px-5 py-4 text-center bg-emerald-50/30 dark:bg-emerald-500/5">Masuk (+)</th>
-                            <th class="px-5 py-4 text-center bg-red-50/30 dark:bg-red-500/5">Keluar (-)</th>
-                            <th class="px-5 py-4 text-center bg-indigo-50/30 dark:bg-indigo-500/5">Saldo</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-slate-700/50">
-                        <tr class="bg-gray-50/50 dark:bg-slate-800/50">
-                            <td class="px-5 py-3 text-xs font-bold text-gray-400 italic" colspan="5">STOK AWAL PERIODE</td>
-                            <td class="px-5 py-3 text-center font-black text-gray-800 dark:text-gray-100">{{ $stokAwal }}</td>
-                        </tr>
+                <div class="xl:col-span-1 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden shadow-sm self-start">
+                    <div class="p-5 bg-gray-50/80 dark:bg-slate-900/50 border-b border-gray-100 dark:border-slate-700">
+                        <h4 class="font-black text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                            Stok per Batch Aktif
+                        </h4>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left border-collapse">
+                            <thead class="text-[10px] text-gray-500 dark:text-gray-400 uppercase bg-gray-50 dark:bg-slate-900/50 border-b border-gray-100 dark:border-slate-700 font-black tracking-widest">
+                                <tr>
+                                    <th class="px-5 py-3">No. Batch</th>
+                                    <th class="px-5 py-3 text-center">Expired</th>
+                                    <th class="px-5 py-3 text-right">Stok</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50 dark:divide-slate-700/50">
+                                @forelse($activeBatches as $batch)
+                                    @php $isNearExp = \Carbon\Carbon::parse($batch->expired_date)->diffInDays(now()) < 90; @endphp
+                                    <tr class="hover:bg-gray-50/80 dark:hover:bg-slate-700/30 transition-colors {{ $isNearExp ? 'bg-red-50/30 dark:bg-red-900/10' : '' }}">
+                                        <td class="px-5 py-3.5 font-mono font-bold text-gray-700 dark:text-gray-300 text-xs">{{ $batch->batch_number }}</td>
+                                        <td class="px-5 py-3.5 text-center text-xs font-bold {{ $isNearExp ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' }}">
+                                            {{ \Carbon\Carbon::parse($batch->expired_date)->format('d M Y') }}
+                                        </td>
+                                        <td class="px-5 py-3.5 text-right font-black text-indigo-600 dark:text-indigo-400">{{ $batch->stock }}</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="3" class="px-5 py-8 text-center text-gray-400 font-bold text-xs uppercase tracking-widest">Stok Kosong</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-                        @php $runningBalance = $stokAwal; @endphp
-                        @foreach($mutasi as $m)
-                        @php $runningBalance += ($m['masuk'] - $m['keluar']); @endphp
-                        <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                            <td class="px-5 py-4 text-xs font-bold text-gray-600 dark:text-gray-400">{{ $m['tanggal']->format('d/m/Y H:i') }}</td>
-                            <td class="px-5 py-4">
-                                <div class="text-[11px] font-black text-gray-800 dark:text-gray-100">{{ $m['keterangan'] }}</div>
-                                <div class="text-[10px] font-mono font-bold text-indigo-500">{{ $m['referensi'] }}</div>
-                            </td>
-                            <td class="px-5 py-4 text-center text-[11px] font-bold text-gray-500">{{ $m['batch'] }}</td>
-                            <td class="px-5 py-4 text-center font-black text-emerald-600">{{ $m['masuk'] > 0 ? $m['masuk'] : '-' }}</td>
-                            <td class="px-5 py-4 text-center font-black text-red-500">{{ $m['keluar'] > 0 ? $m['keluar'] : '-' }}</td>
-                            <td class="px-5 py-4 text-center font-black text-indigo-700 dark:text-indigo-400 bg-indigo-50/20 dark:bg-indigo-500/5">{{ $runningBalance }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
             </div>
 
         @else
-            <div class="bg-white dark:bg-slate-800 rounded-3xl p-16 text-center border-2 border-dashed border-gray-100 dark:border-slate-700">
-                <div class="inline-flex items-center justify-center w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 rounded-full mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-16 text-center border-2 border-dashed border-gray-200 dark:border-slate-700">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-full mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                 </div>
-                <h3 class="text-xl font-black text-gray-800 dark:text-gray-100">Siap Menganalisa Stok?</h3>
-                <p class="text-gray-500 dark:text-gray-400 mt-2 max-w-sm mx-auto font-medium">Silakan pilih salah satu obat dari dropdown di atas untuk melihat histori mutasi barang secara lengkap.</p>
+                <h3 class="text-xl font-black text-gray-800 dark:text-gray-200 mb-2">Siap Menganalisa Stok?</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto font-medium">Gunakan fitur Live Search di atas untuk memantau pergerakan mutasi dan rincian expired date per-batch.</p>
             </div>
         @endif
     </div>

@@ -15,7 +15,7 @@ return new class extends Migration
         $table->id();
         $table->foreignId('category_id')->constrained();
         $table->foreignId('unit_id')->constrained();
-        $table->string('sku')->unique(); // Barcode unik
+        $table->string('sku')->unique(); 
         $table->string('name');
         $table->bigInteger('selling_price');
         $table->boolean('is_active')->default(true);

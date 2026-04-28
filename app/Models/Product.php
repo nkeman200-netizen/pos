@@ -4,13 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\Auditable; // WAJIB dipanggil
+use App\Traits\Auditable; 
 
 class Product extends Model
 {
-    use HasFactory, Auditable; // Pasang trait-nya di sini
+    use HasFactory, Auditable; 
 
-    // Proteksi ketat! Hanya kolom ini yang boleh diisi dari form
     protected $fillable = [
         'category_id',
         'unit_id',
@@ -35,7 +34,6 @@ class Product extends Model
         return $this->hasMany(ProductBatch::class);
     }
 
-    // Accessor untuk menghitung total stok dari batch yang belum expired
     public function getStockAttribute()
     {
         return $this->batches()

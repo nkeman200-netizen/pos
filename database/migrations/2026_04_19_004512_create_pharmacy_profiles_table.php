@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string('name')->default('Apotek Default');
             $table->text('address')->nullable();
             $table->string('phone')->nullable();
-            $table->string('apoteker_name')->nullable(); // Nama Apoteker Penanggung Jawab (APJ)
-            $table->string('sipa_number')->nullable(); // Surat Izin Praktik Apoteker
-            $table->string('logo')->nullable(); // Untuk path gambar logo nanti
+            $table->string('apoteker_name')->nullable(); 
+            $table->string('sipa_number')->nullable();
+            $table->string('logo')->nullable();
             $table->timestamps();
         });
     }

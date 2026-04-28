@@ -19,9 +19,7 @@
                 document.documentElement.classList.add('dark');
             }
         }
-        // Eksekusi saat web dibuka pertama kali
         applyDarkMode();
-        // Eksekusi super kilat setiap kali Livewire pindah halaman
         document.addEventListener('livewire:navigated', applyDarkMode);
     </script>
 
@@ -53,6 +51,12 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                 <span x-show="!sidebarCollapsed">Kasir Penjualan</span>
             </a>
+                @if(in_array(auth()->user()->role, ['kasir']))
+                <a wire:navigate href="{{ route('products.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-400 transition-colors {{ request()->routeIs('products.*') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400' : '' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                    <span x-show="!sidebarCollapsed">Data Obat</span>
+                </a>
+            @endif
             @endif
 
             @if(in_array(auth()->user()->role, ['admin', 'owner']))
@@ -164,7 +168,7 @@
 
                     <div x-show="openProfile" x-transition.opacity.duration.200ms x-cloak class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 overflow-hidden py-1 z-50">
                         
-                        @if(in_array(auth()->user()->role, ['admin', 'owner']))
+                        @if(in_array(auth()->user()->role, ['owner']))
                         <a wire:navigate href="{{ route('users.index') }}" class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                             Manajemen Karyawan

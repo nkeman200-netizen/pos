@@ -11,19 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('units', function (Blueprint $table) {
-            $table->id();
-            $table->string('name'); 
-            $table->string('short_name');
-            $table->timestamps();
+        Schema::table('purchase_items', function (Blueprint $table) {
+            $table->integer('discount')->default(0)->after('purchase_price');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('units');
+        Schema::table('purchase_items', function (Blueprint $table) {
+            $table->dropColumn('discount');
+        });
     }
 };

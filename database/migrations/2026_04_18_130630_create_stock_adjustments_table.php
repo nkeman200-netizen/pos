@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_batch_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained(); // Siapa admin yang opname
-            $table->integer('system_qty');   // Stok di sistem sebelum diubah
-            $table->integer('physical_qty'); // Stok fisik riil di rak
-            $table->integer('difference');   // physical - system (bisa minus kalau hilang)
-            $table->string('reason');        // Alasan: Rusak, Hilang, Salah Input, dll
+            $table->foreignId('user_id')->constrained();
+            $table->integer('system_qty');   
+            $table->integer('physical_qty'); 
+            $table->integer('difference');   
+            $table->string('reason');        
             $table->timestamps();
         });
     }

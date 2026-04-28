@@ -14,10 +14,8 @@
         },
         get isLunas() {
             if ($wire.paymentMethod !== 'cash') return true;
-            // Gunakan konversi String untuk menghindari error manipulasi teks
             let payStr = String($wire.pembayaran || '0');
             let pay = parseInt(payStr.replace(/[^0-9]/g, '')) || 0;
-            // Gunakan injeksi Blade langsung {{ $this->total }} alih-alih $wire.total
             return pay >= {{ $this->total }};
         }
     }"
@@ -144,12 +142,12 @@
                     <svg class="h-6 w-6 text-gray-400 group-focus-within:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 <input type="text" x-ref="searchInput" wire:model.live.debounce.300ms="searchQuery" 
-                       x-on:input="highlightIndex = 0"
-                       @keydown.arrow-down.prevent="highlightIndex = Math.min(highlightIndex + 1, {{ max(0, count($this->searchResults) - 1) }})"
-                       @keydown.arrow-up.prevent="highlightIndex = Math.max(highlightIndex - 1, 0)"
-                       @keydown.enter.prevent="if($wire.searchQuery.length >= 2) { $wire.addHighlightedToCart(highlightIndex); }"
-                       placeholder="Scan Barcode atau Cari Nama... (Arrow Bawah/Atas lalu Enter)"
-                       class="w-full pl-14 p-5 bg-white dark:bg-slate-800 border-2 border-transparent focus:border-indigo-500 rounded-3xl shadow-sm text-lg font-bold dark:text-white outline-none transition-all">
+                    x-on:input="highlightIndex = 0"
+                    @keydown.arrow-down.prevent="highlightIndex = Math.min(highlightIndex + 1, {{ max(0, count($this->searchResults) - 1) }})"
+                    @keydown.arrow-up.prevent="highlightIndex = Math.max(highlightIndex - 1, 0)"
+                    @keydown.enter.prevent="if($wire.searchQuery.length >= 2) { $wire.addHighlightedToCart(highlightIndex); }"
+                    placeholder="Scan Barcode atau Cari Nama... (Arrow Bawah/Atas lalu Enter)"
+                    class="w-full pl-14 p-5 bg-white dark:bg-slate-800 border-2 border-transparent focus:border-indigo-500 rounded-3xl shadow-sm text-lg font-bold dark:text-white outline-none transition-all">
                 
                 <div x-show="$wire.searchQuery.length >= 2" class="absolute z-50 mt-3 w-full bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
                     @foreach($this->searchResults as $index => $product)
@@ -229,18 +227,28 @@
                 </div>
 
                 <div class="space-y-4 mb-8">
-                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Metode Bayar (F8)</label>
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+                        Metode Bayar (F8)
+                    </label>
                     <div class="grid grid-cols-2 gap-2">
                         <button type="button" wire:click="$set('paymentMethod', 'cash')" 
-                                class="py-3 rounded-xl font-bold transition-all border-2 focus:ring-2 focus:ring-indigo-500 {{ $paymentMethod === 'cash' ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-indigo-500/20' : 'bg-white border-gray-100 text-gray-400 dark:bg-slate-900 dark:border-slate-700' }}">
-                            💵 TUNAI
+                            class="py-3 rounded-xl font-bold transition-all border-2 flex items-center justify-center gap-3 focus:ring-2 focus:ring-indigo-500 {{ $paymentMethod === 'cash' ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-indigo-500/20' : 'bg-white border-gray-100 text-gray-400 dark:bg-slate-900 dark:border-slate-700' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-banknote text-green-500">
+                                <rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>
+                            </svg>
+                            <span>TUNAI</span>
                         </button>
+
                         <button type="button" wire:click="$set('paymentMethod', 'qris')" 
-                                class="py-3 rounded-xl font-bold transition-all border-2 focus:ring-2 focus:ring-indigo-500 {{ $paymentMethod === 'qris' ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-indigo-500/20' : 'bg-white border-gray-100 text-gray-400 dark:bg-slate-900 dark:border-slate-700' }}">
-                            📱 QRIS
+                            class="py-3 rounded-xl font-bold transition-all border-2 flex items-center justify-center gap-3 focus:ring-2 focus:ring-indigo-500 {{ $paymentMethod === 'qris' ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-indigo-500/20' : 'bg-white border-gray-100 text-gray-400 dark:bg-slate-900 dark:border-slate-700' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-qr-code text-purple-500">
+                                <rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16h.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"}/>
+                            </svg>
+                            <span>QRIS</span>
                         </button>
                     </div>
                 </div>
+
 
                 @if($paymentMethod === 'cash')
                 <div class="mb-6">
@@ -248,9 +256,9 @@
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 font-black text-gray-400">Rp</span>
                         <input type="text" x-ref="paymentInput" wire:model.live.debounce.300ms="pembayaran" 
-                               x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')"
-                               @keydown.enter.prevent="$wire.saveTransaction()"
-                               class="w-full pl-12 p-4 bg-gray-50 dark:bg-slate-900 border-2 border-gray-100 dark:border-slate-700 rounded-2xl text-2xl font-black text-indigo-600 outline-none focus:border-indigo-500 transition-all text-right">
+                            x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')"
+                            @keydown.enter.prevent="$wire.saveTransaction()"
+                            class="w-full pl-12 p-4 bg-gray-50 dark:bg-slate-900 border-2 border-gray-100 dark:border-slate-700 rounded-2xl text-2xl font-black text-indigo-600 outline-none focus:border-indigo-500 transition-all text-right">
                     </div>
                 </div>
                 @endif
@@ -308,13 +316,20 @@
             <p class="text-sm text-gray-500 mb-6 font-medium">Kosongkan meja kasir sementara untuk melayani pelanggan lain.</p>
             <div class="mb-8">
                 <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Catatan/Identitas (Opsional)</label>
-                <input type="text" wire:model="holdNote" x-ref="holdNoteInput" wire:keydown.enter="holdTransaction; showHoldModal = false" 
-                       class="w-full p-4 bg-gray-50 dark:bg-slate-900 border-2 border-gray-100 dark:border-slate-700 rounded-xl outline-none focus:border-amber-500 transition-all text-lg font-bold" 
-                       placeholder="Misal: Bapak Baju Merah">
+                
+                <input type="text" wire:model="holdNote" x-ref="holdNoteInput" 
+                    @keydown.enter="showHoldModal = false; setTimeout(() => { $wire.holdTransaction() }, 150)" 
+                    class="w-full p-4 bg-gray-50 dark:bg-slate-900 border-2 border-gray-100 dark:border-slate-700 rounded-xl outline-none focus:border-amber-500 transition-all text-lg font-bold" 
+                    placeholder="Misal: Bapak Baju Merah">
             </div>
             <div class="flex gap-3">
                 <button type="button" @click="showHoldModal = false" class="flex-1 py-4 bg-gray-100 dark:bg-slate-700 rounded-xl font-bold focus:ring-2 focus:ring-gray-400">Batal (Esc)</button>
-                <button type="button" wire:click="holdTransaction" @click="showHoldModal = false" class="flex-1 py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black shadow-lg transition-all focus:ring-4 focus:ring-amber-300">Simpan (Enter)</button>
+                
+                <button type="button" 
+                        @click="showHoldModal = false; setTimeout(() => { $wire.holdTransaction() }, 150)" 
+                        class="flex-1 py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black shadow-lg transition-all focus:ring-4 focus:ring-amber-300">
+                    Simpan (Enter)
+                </button>
             </div>
         </div>
     </div>
@@ -325,10 +340,12 @@
             <p class="text-sm text-gray-500 mb-6 font-medium">Gunakan tombol TAB dan ENTER untuk memilih antrean.</p>
             <div class="overflow-y-auto flex-1 space-y-3 custom-scrollbar pr-2">
                 @forelse($heldTransactionsList as $index => $held)
-                <button type="button" id="recall-btn-{{ $index }}" wire:click="recallTransaction({{ $held->id }})" @click="showRecallModal = false"
-                        class="w-full text-left p-4 border-2 border-gray-100 dark:border-slate-700 rounded-2xl flex justify-between items-center hover:border-blue-300 dark:hover:border-blue-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition cursor-pointer group">
+                
+                <button type="button" id="recall-btn-{{ $index }}" 
+                    @click="showRecallModal = false; setTimeout(() => { $wire.recallTransaction({{ $held->id }}) }, 150)"
+                    class="w-full text-left p-4 border-2 border-gray-100 dark:border-slate-700 rounded-2xl flex justify-between items-center hover:border-blue-300 dark:hover:border-blue-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition cursor-pointer group">
                     <div>
-                        <p class="font-bold text-gray-800 dark:text-white text-lg group-focus:text-blue-600">{{ $held->notes ?: 'Tanpa Catatan/Nama' }}</p>
+                        <p class="font-bold text-gray-800 dark:text-white text-lg group-focus:text-blue-600">{{ $held->reference_notes ?: 'Tanpa Catatan/Nama' }}</p>
                         <p class="text-xs text-gray-500 font-medium mt-1">
                             ⏰ {{ $held->created_at->format('H:i') }} &nbsp;•&nbsp; 📦 {{ count($held->cart_data) }} item
                         </p>

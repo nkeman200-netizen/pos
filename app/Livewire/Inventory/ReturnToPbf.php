@@ -26,7 +26,10 @@ class ReturnToPbf extends Component
     public $notes = '';
 
     public $maxQty = 0;
-    public $printData = null; // Untuk menyimpan data TTRB yang mau dicetak
+    public $printData = null;
+    public $searchProduct = '';
+    public $searchResults = [];
+    public $productName = '';
 
     public function updatedProductId($value)
     {
@@ -43,6 +46,43 @@ class ReturnToPbf extends Component
         } else {
             $this->maxQty = 0;
         }
+    }
+
+    public function updatedSearchProduct($value)
+    {
+        if (strlen($value) >= 2) {
+            $this->searchResults = Product::whereHas('batches', function($q) {
+                $q->where('stock', '>', 0);
+            })
+            ->where(function($q) use ($value) {
+                $q->where('name', 'like', "%{$value}%")
+                  ->orWhere('sku', 'like', "%{$value}%");
+            })
+            ->take(5)->get(); 
+        } else {
+            $this->searchResults = [];
+        }
+    }
+
+    public function selectProduct($id, $name)
+    {
+        $this->productId = $id;
+        $this->productName = $name;
+        $this->searchProduct = ''; 
+        $this->searchResults = []; 
+        
+        $this->batchId = '';
+        $this->qty = '';
+        $this->maxQty = 0;
+    }
+
+    public function clearProduct()
+    {
+        $this->productId = '';
+        $this->productName = '';
+        $this->batchId = '';
+        $this->qty = '';
+        $this->maxQty = 0;
     }
 
     public function save()
@@ -68,11 +108,9 @@ class ReturnToPbf extends Component
                     throw new \Exception('Stok tidak mencukupi saat diproses.');
                 }
 
-                // 1. Generate Nomor Retur (Contoh: RTV-260418-001)
                 $returnNumber = 'RTV-' . date('ymd') . '-' . rand(100, 999);
                 $estimasiNilai = $batch->purchase_price * $this->qty;
 
-                // 2. Buat Header Retur
                 $retur = PurchaseReturn::create([
                     'return_number' => $returnNumber,
                     'supplier_id' => $this->supplierId,
@@ -82,7 +120,6 @@ class ReturnToPbf extends Component
                     'total_return_value' => $estimasiNilai,
                 ]);
 
-                // 3. Buat Detail Item Retur
                 PurchaseReturnItem::create([
                     'purchase_return_id' => $retur->id,
                     'product_id' => $this->productId,
@@ -92,17 +129,14 @@ class ReturnToPbf extends Component
                     'unit_price' => $batch->purchase_price ?? 0,
                 ]);
 
-                // 4. Potong Stok di Gudang
                 $batch->decrement('stock', $this->qty);
                 
-                // Siapkan data untuk trigger cetak struk RTV otomatis
                 $this->printData = PurchaseReturn::with(['supplier', 'user', 'items.product', 'items.batch'])->find($retur->id);
             });
 
             session()->flash('success', 'Dokumen Retur berhasil dibuat & stok telah dipotong!');
             $this->reset(['supplierId', 'productId', 'batchId', 'qty', 'reason', 'notes', 'maxQty']);
             
-            // Dispatch event ke AlpineJS untuk otomatis trigger window.print()
             $this->dispatch('trigger-print');
 
         } catch (\Exception $e) {
@@ -119,14 +153,10 @@ class ReturnToPbf extends Component
     public function render()
     {
         $suppliers = Supplier::orderBy('name')->get();
-        $products = Product::whereHas('batches', function($q) {
-            $q->where('stock', '>', 0);
-        })->orderBy('name')->get();
         
         $batches = $this->productId ? ProductBatch::where('product_id', $this->productId)->where('stock', '>', 0)->orderBy('expired_date')->get() : [];
-        
         $recentReturns = PurchaseReturn::with(['supplier', 'user'])->latest()->take(5)->get();
 
-        return view('livewire.inventory.return-to-pbf', compact('suppliers', 'products', 'batches', 'recentReturns'));
+        return view('livewire.inventory.return-to-pbf', compact('suppliers', 'batches', 'recentReturns'));
     }
 }

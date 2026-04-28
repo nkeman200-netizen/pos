@@ -70,20 +70,35 @@
                 </div>
             </div>
 
-            <div>
-                <label for="selling_price" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Harga Jual / Satuan <span class="text-red-500">*</span></label>
-                <div class="relative w-full md:w-1/2">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <span class="text-gray-500 dark:text-gray-400 text-sm font-bold">Rp</span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-100 dark:border-slate-700 pt-6 mt-2">
+                
+                <div>
+                    <label for="selling_price" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Harga Jual / Satuan <span class="text-red-500">*</span></label>
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span class="text-gray-500 dark:text-gray-400 text-sm font-bold">Rp</span>
+                        </div>
+                        <input 
+                            x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')"
+                            type="text" id="selling_price" 
+                            wire:model="selling_price" min="0" placeholder="0"
+                            class="w-full pl-12 p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-800 transition-colors text-sm text-right font-mono font-bold text-gray-800 dark:text-white">
                     </div>
-                    <input 
-                        x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')"
-                        type="text" id="selling_price" 
-                        wire:model="selling_price" min="0" placeholder="0"
-                        class="w-full pl-12 p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-800 transition-colors text-sm text-right font-mono font-bold text-gray-800 dark:text-white">
+                    <p class="text-[11px] text-gray-400 mt-1.5 font-medium">Harga yang akan dikenakan ke pelanggan di kasir.</p>
+                    @error('selling_price') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
                 </div>
-                <p class="text-xs text-gray-400 mt-1.5">Harga yang akan dikenakan ke pelanggan di kasir.</p>
-                @error('selling_price') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+
+                <div>
+                    <label for="min_stock" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Batas Minimal Stok <span class="text-red-500">*</span></label>
+                    <div class="relative w-full">
+                        <input 
+                            type="number" id="min_stock" 
+                            wire:model="min_stock" min="0" placeholder="0"
+                            class="w-full p-2.5 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-700/50 rounded-xl outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white dark:focus:bg-slate-800 transition-colors text-sm text-center font-bold text-yellow-800 dark:text-yellow-500 shadow-inner">
+                    </div>
+                    <p class="text-[11px] text-gray-400 mt-1.5 font-medium">Isi 0 jika obat ini <b class="text-red-400">TIDAK</b> ingin ditarik otomatis saat PO.</p>
+                    @error('min_stock') <span class="text-red-500 text-xs mt-1 block font-bold">{{ $message }}</span> @enderror
+                </div>
             </div>
 
             <div class="pt-6 mt-4 border-t border-gray-100 dark:border-slate-700 flex flex-col sm:flex-row gap-3">

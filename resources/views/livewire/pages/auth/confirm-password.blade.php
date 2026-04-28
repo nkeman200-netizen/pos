@@ -39,7 +39,6 @@ new #[Layout('layouts.guest')] class extends Component
     </div>
 
     <form wire:submit="confirmPassword">
-        <!-- Password -->
         <div>
             <x-input-label for="password" :value="__('Password')" />
 

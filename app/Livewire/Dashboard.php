@@ -21,13 +21,10 @@ class Dashboard extends Component
         $today = Carbon::today();
         $threeMonthsFromNow = Carbon::now()->addMonths(3);
 
-        // 1. SUMMARY CARDS (Hari Ini)
-        // Hitung Omzet dan Total Transaksi Hari Ini
         $salesToday = Sale::whereDate('created_at', $today)->get();
         $omzetHariIni = $salesToday->sum('total_price');
         $transaksiHariIni = $salesToday->count();
 
-        // Hitung Estimasi Profit Hari Ini (Sama dengan logika di Laporan)
         $profitHariIni = 0;
         foreach ($salesToday as $sale) {
             foreach ($sale->details as $item) {
@@ -36,11 +33,9 @@ class Dashboard extends Component
             }
         }
 
-        // Hitung Total Aset Gudang (Qty * Harga Beli)
         $totalAset = ProductBatch::selectRaw('SUM(stock * purchase_price) as total_aset')->value('total_aset') ?? 0;
 
 
-        // 2. DATA UNTUK CHART (Tren Omzet 7 Hari Terakhir)
         $last7Days = collect();
         $chartData = collect();
         
@@ -53,17 +48,14 @@ class Dashboard extends Component
         }
 
 
-        // 3. EWS: Obat Kritis (Total Stok < 10)
-        // Karena stok ada di tabel product_batches, kita gunakan withSum untuk menghitung totalnya
         $obatKritis = Product::with(['category', 'unit'])
             ->withSum('batches as total_stock', 'stock')
-            ->having('total_stock', '<', 10) // Gunakan having karena total_stock adalah kolom hasil agregasi
+            ->having('total_stock', '<', 10) 
             ->orderBy('total_stock', 'asc')
             ->take(5)
             ->get();
 
 
-        // 4. EWS: Obat Hampir Expired (ED < 3 Bulan, Stok > 0)
         $obatHampirExpired = ProductBatch::with('product')
             ->where('stock', '>', 0)
             ->where('expired_date', '<=', $threeMonthsFromNow)

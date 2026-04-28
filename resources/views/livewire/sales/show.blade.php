@@ -20,13 +20,6 @@
         }
     </style>
 
-    {{-- <script>
-        // Redirect otomatis ke Kasir Baru setelah dialog print ditutup atau dicancel
-        window.onafterprint = function() {
-            window.location.href = "{{ route('sales.create') }}";
-        };
-    </script> --}}
-
     <div class="w-full max-w-2xl">
         @if (session()->has('success'))
             <div class="mb-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl font-black text-center no-print">

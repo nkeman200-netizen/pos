@@ -27,20 +27,17 @@ class Edit extends Component
             'address' => 'required',
         ]);
 
-        // 2. Simpan ke Database
         Customer::findOrFail($this->customerId)->update([
             'name' => $this->name,
             'phone' => $this->phone,
             'address' => $this->address
         ]);
 
-        // 3. Beri notifikasi dan kembalikan ke halaman daftar
         session()->flash('success', 'Pelanggan berhasil diperbarui!');
         return redirect()->route('customers.index');
     }
 
     public function resetForm(){
-        // Tinggal panggil ulang fungsi mount! Praktis kan?
         $this->mount($this->customerId);
     }
     

@@ -56,11 +56,22 @@
         </div>
 
         <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-wrap items-center gap-4">
-            <div class="flex items-center gap-3">
-                <span class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Periode</span>
-                <input type="date" wire:model.live="startDate" class="[color-scheme:light] dark:[color-scheme:dark] p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <span class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest hidden sm:block">Periode</span>
+                <input type="date" wire:model.live="startDate" class="[color-scheme:light] dark:[color-scheme:dark] p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold w-full sm:w-auto">
                 <span class="text-gray-300">s/d</span>
-                <input type="date" wire:model.live="endDate" class="[color-scheme:light] dark:[color-scheme:dark] p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold">
+                <input type="date" wire:model.live="endDate" class="[color-scheme:light] dark:[color-scheme:dark] p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold w-full sm:w-auto">
+            </div>
+            
+            <div class="hidden sm:block w-px h-8 bg-gray-200 dark:bg-slate-700"></div>
+
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <span class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Tampilan</span>
+                <select wire:model.live="frequency" class="p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold w-full sm:w-auto">
+                    <option value="detail">Struk per Struk (Detail)</option>
+                    <option value="daily">Rekap Harian</option>
+                    <option value="monthly">Rekap Bulanan</option>
+                </select>
             </div>
         </div>
     </div>
@@ -69,7 +80,8 @@
         
         <div class="hidden print:block text-center mb-8 pb-4 border-b-4 border-double border-gray-800">
             <h1 class="text-2xl font-black uppercase">LAPORAN ANALISIS PENJUALAN & LABA</h1>
-            <p class="text-sm font-bold italic mt-1">Periode: {{ date('d M Y', strtotime($startDate)) }} - {{ date('d M Y', strtotime($endDate)) }}</p>
+            <p class="text-sm font-bold italic mt-1">Periode: {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d M Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d M Y') }}</p>
+            <p class="text-xs font-bold mt-1">Format: {{ $frequency == 'detail' ? 'Detail Transaksi' : ($frequency == 'daily' ? 'Rekapitulasi Harian' : 'Rekapitulasi Bulanan') }}</p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -95,41 +107,74 @@
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
             <div class="xl:col-span-2">
                 <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm overflow-hidden">
-                    <div class="p-5 border-b border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-between items-center print:hidden">
-                        <h3 class="font-bold text-gray-800 dark:text-gray-100">Riwayat Penjualan Detail</h3>
+                    <div class="p-5 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center print:hidden">
+                        <h3 class="font-bold text-gray-800 dark:text-gray-100">
+                            @if($frequency === 'detail') Riwayat Penjualan Detail @endif
+                            @if($frequency === 'daily') Rekapitulasi Pendapatan Harian @endif
+                            @if($frequency === 'monthly') Rekapitulasi Pendapatan Bulanan @endif
+                        </h3>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead class="bg-gray-50/80 dark:bg-slate-900/50 text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-tighter border-b border-gray-200 dark:border-slate-700 font-black">
                                 <tr>
-                                    <th class="px-5 py-4">Tgl / Invoice</th>
-                                    <th class="px-5 py-4">Kasir</th>
+                                    @if($frequency === 'detail')
+                                        <th class="px-5 py-4">Tgl / Invoice</th>
+                                        <th class="px-5 py-4">Kasir</th>
+                                    @else
+                                        <th class="px-5 py-4">Waktu / Periode</th>
+                                        <th class="px-5 py-4 text-center">Jml Transaksi</th>
+                                    @endif
                                     <th class="px-5 py-4 text-right">Total (Rp)</th>
                                     <th class="px-5 py-4 text-right">Est. Laba (Rp)</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-slate-700/50">
-                                @forelse($sales as $sale)
-                                <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                                    <td class="px-5 py-4">
-                                        <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $sale->created_at->format('d/m/y H:i') }}</div>
-                                        <div class="text-[10px] font-mono font-bold text-indigo-600">{{ $sale->invoice_number }}</div>
-                                    </td>
-                                    <td class="px-5 py-4 text-xs font-bold text-gray-600 dark:text-gray-400">{{ $sale->user->name ?? 'System' }}</td>
-                                    <td class="px-5 py-4 text-right font-black text-sm text-gray-800 dark:text-gray-100 font-mono">{{ number_format($sale->total_price) }}</td>
-                                    
-                                    @php
-                                        $labaInvoice = 0;
-                                        foreach($sale->details as $d) {
-                                            $modal = $d->product->batches->avg('purchase_price') ?? 0;
-                                            $labaInvoice += ($d->unit_price - $modal) * $d->quantity;
-                                        }
-                                    @endphp
-                                    <td class="px-5 py-4 text-right font-bold text-sm text-emerald-600 dark:text-emerald-400 font-mono">{{ number_format($labaInvoice) }}</td>
-                                </tr>
-                                @empty
-                                <tr><td colspan="4" class="p-10 text-center text-gray-400 italic">Tidak ada data.</td></tr>
-                                @endforelse
+                                
+                                @if($frequency === 'detail')
+                                    {{-- TABEL MODE DETAIL (STRUK) --}}
+                                    @forelse($reportTable as $sale)
+                                    <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors">
+                                        <td class="px-5 py-4">
+                                            <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $sale->created_at->format('d/m/y H:i') }}</div>
+                                            <div class="text-[10px] font-mono font-bold text-indigo-600">{{ $sale->invoice_number }}</div>
+                                        </td>
+                                        <td class="px-5 py-4 text-xs font-bold text-gray-600 dark:text-gray-400">{{ $sale->user->name ?? 'System' }}</td>
+                                        <td class="px-5 py-4 text-right font-black text-sm text-gray-800 dark:text-gray-100 font-mono">{{ number_format($sale->total_price) }}</td>
+                                        
+                                        @php
+                                            $labaInvoice = 0;
+                                            foreach($sale->details as $d) {
+                                                $modal = $d->product->batches->avg('purchase_price') ?? 0;
+                                                $labaInvoice += ($d->unit_price - $modal) * $d->quantity;
+                                            }
+                                        @endphp
+                                        <td class="px-5 py-4 text-right font-bold text-sm text-emerald-600 dark:text-emerald-400 font-mono">{{ number_format($labaInvoice) }}</td>
+                                    </tr>
+                                    @empty
+                                    <tr><td colspan="4" class="p-10 text-center text-gray-400 italic">Tidak ada transaksi pada periode ini.</td></tr>
+                                    @endforelse
+                                
+                                @else
+                                    {{-- TABEL MODE REKAP (HARIAN / BULANAN) --}}
+                                    @foreach($reportTable as $row)
+                                    <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors {{ $row['transaksi'] == 0 ? 'opacity-50 bg-gray-50/30 dark:bg-slate-800/30' : '' }}">
+                                        <td class="px-5 py-4">
+                                            <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $row['label'] }}</div>
+                                        </td>
+                                        <td class="px-5 py-4 text-center">
+                                            @if($row['transaksi'] > 0)
+                                                <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-indigo-100 bg-indigo-600 rounded-full">{{ $row['transaksi'] }} struk</span>
+                                            @else
+                                                <span class="text-xs text-gray-400 font-bold">-</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-5 py-4 text-right font-black text-sm {{ $row['omzet'] > 0 ? 'text-gray-800 dark:text-gray-100' : 'text-gray-400' }} font-mono">{{ number_format($row['omzet']) }}</td>
+                                        <td class="px-5 py-4 text-right font-bold text-sm {{ $row['laba'] > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400' }} font-mono">{{ number_format($row['laba']) }}</td>
+                                    </tr>
+                                    @endforeach
+                                @endif
+
                             </tbody>
                         </table>
                     </div>
@@ -143,7 +188,7 @@
                         Top 5 Produk Terlaris
                     </h3>
                     <div class="space-y-4">
-                        @foreach($topProducts as $index => $product)
+                        @forelse($topProducts as $index => $product)
                         <div class="flex items-center gap-4 p-3 rounded-xl bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700">
                             <div class="w-8 h-8 flex items-center justify-center bg-indigo-600 text-white rounded-lg font-black text-xs">{{ $index + 1 }}</div>
                             <div class="flex-1 min-w-0">
@@ -151,7 +196,9 @@
                                 <p class="text-[10px] text-gray-500 font-bold uppercase">{{ number_format($product->total_qty) }} Pcs Terjual</p>
                             </div>
                         </div>
-                        @endforeach
+                        @empty
+                        <p class="text-xs text-gray-400 italic text-center py-4">Belum ada data penjualan.</p>
+                        @endforelse
                     </div>
                 </div>
 

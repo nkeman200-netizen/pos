@@ -19,13 +19,11 @@ class PurchaseOrderItem extends Model
         'subtotal'
     ];
 
-    // Relasi ke Induk PO
     public function purchaseOrder()
     {
         return $this->belongsTo(PurchaseOrder::class);
     }
 
-    // Relasi ke Data Obat Master
     public function product()
     {
         return $this->belongsTo(Product::class);

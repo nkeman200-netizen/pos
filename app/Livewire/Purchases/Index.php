@@ -15,7 +15,6 @@ class Index extends Component
 
     public $search = '';
 
-    // Reset halaman saat mengetik pencarian
     public function updatingSearch()
     {
         $this->resetPage();

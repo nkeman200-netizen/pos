@@ -8,7 +8,6 @@ class HeldTransaction extends Model
 {
     protected $guarded = [];
 
-    // Beri tahu Laravel bahwa kolom cart_data itu isinya Array/JSON
     protected $casts = [
         'cart_data' => 'array',
     ];

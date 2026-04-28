@@ -93,14 +93,12 @@
                     <div class="space-y-3">
                         @foreach($obatHampirExpired as $batch)
                             @php
-                                // Ratakan ke awal hari (00:00:00) agar hitungannya bulat
                                 $now = \Carbon\Carbon::now()->startOfDay();
                                 $ed = \Carbon\Carbon::parse($batch->expired_date)->startOfDay();
                                 
-                                $sisaHari = $now->diffInDays($ed, false); // false agar sisa hari bisa minus
+                                $sisaHari = $now->diffInDays($ed, false); 
                                 $isBasi = $sisaHari < 0;
 
-                                // Logika dinamis: Jika < 30 hari tampilkan Hari, jika lebih tampilkan Bulan
                                 if ($isBasi) {
                                     $teksSisa = 'KADALUARSA!';
                                 } elseif ($sisaHari < 30) {

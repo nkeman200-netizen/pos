@@ -11,10 +11,8 @@ class PurchaseOrderController extends Controller
     {
         $po = PurchaseOrder::with(['supplier', 'user', 'items.product'])->findOrFail($id);
         
-        // Load view khusus PDF
         $pdf = Pdf::loadView('purchase-orders.pdf', compact('po'));
         
-        // Download atau stream di browser
         return $pdf->stream('PO-' . $po->po_number . '.pdf');
     }
 }

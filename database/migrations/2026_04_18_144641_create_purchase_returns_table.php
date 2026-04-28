@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // 1. Tabel Header Retur
         Schema::create('purchase_returns', function (Blueprint $table) {
             $table->id();
-            $table->string('return_number')->unique(); // Contoh: RTV/2026/04/001
             $table->foreignId('supplier_id')->constrained();
-            $table->foreignId('user_id')->constrained(); // Admin/Apoteker yang memproses
+            $table->foreignId('user_id')->constrained(); 
             $table->date('return_date');
             $table->text('notes')->nullable();
-            $table->decimal('total_return_value', 15, 2)->default(0); // Estimasi nilai barang yang balik
+            $table->decimal('total_return_value', 15, 2)->default(0); 
             $table->timestamps();
         });
 

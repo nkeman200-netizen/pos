@@ -13,7 +13,6 @@ class SaleItem extends Model
 
     public function sale()
     {
-        // Anak 'milik' Bapak
         return $this->belongsTo(Sale::class);
     }
 

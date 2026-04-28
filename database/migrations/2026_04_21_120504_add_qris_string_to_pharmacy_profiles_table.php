@@ -12,7 +12,6 @@ return new class extends Migration
     public function up()
     {
         Schema::table('pharmacy_profiles', function (Blueprint $table) {
-            // Teks QRIS aslinya bisa lumayan panjang, jadi pakai text() lebih aman dari string()
             $table->text('qris_string')->nullable()->after('address'); 
         });
     }

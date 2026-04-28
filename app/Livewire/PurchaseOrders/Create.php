@@ -37,48 +37,48 @@ class Create extends Component
         return collect($this->items)->sum('subtotal');
     }
 
-    // Fungsi ini otomatis dipanggil Livewire setiap kali user mengetik di array $items
     public function updatedItems($value, $key)
     {
-        // $key bentuknya akan seperti "0.quantity" atau "0.purchase_price"
         $parts = explode('.', $key);
         if (count($parts) == 2) {
-            $index = $parts[0]; // Ambil angka index-nya (0, 1, 2, dst)
-            $this->syncItem($index); // Jalankan fungsi hitung subtotal
+            $index = $parts[0]; 
+            $this->syncItem($index); 
         }
     }
     
-    // FITUR PINTAR: Tarik Otomatis Obat Kritis (Aman & Anti-Error)
     public function loadKritis()
     {
-        // 1. Ambil semua obat beserta total stoknya dari relasi tabel batches
-        $semuaObat = Product::withSum('batches', 'stock')->get();
+        set_time_limit(120);
 
-        // 2. Filter menggunakan Collection (Lebih aman dari SQL Error)
-        $produkKritis = $semuaObat->filter(function ($p) {
-            // Masuk kategori kritis jika stok < 10, atau belum punya stok sama sekali (null)
-            return $p->batches_sum_stock <= 10 || $p->batches_sum_stock === null;
-        });
+        $produkKritis = Product::withSum('batches', 'stock')
+            ->where('min_stock', '>', 0) 
+            ->havingRaw('batches_sum_stock <= min_stock') 
+            ->orHavingRaw('batches_sum_stock IS NULL') 
+            ->get();
 
-        if($produkKritis->isEmpty()) {
-            session()->flash('success', 'Wah, aman! Belum ada obat yang stoknya kritis.');
+        if ($produkKritis->isEmpty()) {
+            session()->flash('success', 'Semua stok obat aman sesuai batas minimal!');
             return;
         }
 
+        $jumlahTerambil = 0;
         foreach ($produkKritis as $p) {
-            // Cegah duplikasi di keranjang
             if (!collect($this->items)->contains('product_id', $p->id)) {
+                $stokSekarang = $p->batches_sum_stock ?? 0;
+                $saranOrder = ($p->min_stock * 2) - $stokSekarang;
+
                 $this->items[] = [
                     'product_id' => $p->id,
                     'name' => $p->name,
-                    'quantity' => 10, // Saran default pesen 10 biji
+                    'quantity' => max(1, $saranOrder), 
                     'purchase_price' => 0, 
                     'subtotal' => 0
                 ];
+                $jumlahTerambil++;
             }
         }
-        
-        session()->flash('success', 'Obat kritis berhasil ditarik otomatis!');
+
+        session()->flash('success', "Berhasil menarik {$jumlahTerambil} obat yang butuh restock!");
     }
 
     public function addToCart($idProduct)
@@ -86,7 +86,6 @@ class Create extends Component
         $product = Product::find($idProduct);
         if (!$product) return;
 
-        // Cek kalau sudah ada, tambahin Qty aja
         $index = collect($this->items)->search(fn($item) => $item['product_id'] === $product->id);
         
         if ($index !== false) {
@@ -170,8 +169,7 @@ class Create extends Component
             });
 
             session()->flash('success', 'Surat Purchase Order (PO) berhasil dibuat!');
-            // return redirect()->route('purchase-orders.index'); // Nanti kita buat rute ini
-            $this->items = []; // Kosongkan sementara untuk testing
+            $this->items = []; 
             return redirect()->route('purchase-orders.index');
         } catch (\Exception $e) {
             session()->flash('error', 'Gagal menyimpan PO: ' . $e->getMessage());

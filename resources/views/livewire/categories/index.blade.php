@@ -16,8 +16,15 @@
     @endif
 
     <div class="mb-4">
-        <input wire:model.live="search" type="text" placeholder="Cari kategori..." class="w-full md:w-1/3 rounded-lg border-gray-300 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+        <div class="w-full md:w-1/3 relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </div>
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Cari SKU atau Nama Obat..." 
+                    class="w-full pl-10 p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium text-gray-800 dark:text-white transition-all">
+            </div>
     </div>
+
 
     <div class="bg-white dark:bg-slate-800 shadow-md rounded-xl overflow-hidden">
         <table class="w-full text-left">

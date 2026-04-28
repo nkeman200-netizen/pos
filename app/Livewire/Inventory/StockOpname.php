@@ -21,8 +21,9 @@ class StockOpname extends Component
     public $systemQty = 0;
     public $physicalQty = '';
     public $reason = '';
-
-    // Otomatis reset batch kalau produknya diganti
+    public $searchProduct = '';
+    public $searchResults = [];
+    public $productName = '';
     public function updatedProductId($value)
     {
         $this->batchId = '';
@@ -30,25 +31,57 @@ class StockOpname extends Component
         $this->physicalQty = '';
     }
 
-    // Otomatis tarik stok sistem saat batch dipilih
     public function updatedBatchId($value)
     {
         if ($value) {
             $batch = ProductBatch::find($value);
             $this->systemQty = $batch ? $batch->stock : 0;
-            $this->physicalQty = $this->systemQty; // Default samakan dengan sistem dulu
+            $this->physicalQty = $this->systemQty; 
         } else {
             $this->systemQty = 0;
             $this->physicalQty = '';
         }
     }
 
+    public function updatedSearchProduct($value)
+    {
+        if (strlen($value) >= 2) {
+            $this->searchResults = Product::whereHas('batches')
+                ->where(function($q) use ($value) {
+                    $q->where('name', 'like', "%{$value}%")
+                      ->orWhere('sku', 'like', "%{$value}%");
+                })
+                ->take(5)->get();
+        } else {
+            $this->searchResults = [];
+        }
+    }
+
+    public function selectProduct($id, $name)
+    {
+        $this->productId = $id;
+        $this->productName = $name;
+        $this->searchProduct = ''; 
+        $this->searchResults = []; 
+        
+        $this->batchId = '';
+        $this->systemQty = 0;
+        $this->physicalQty = '';
+    }
+
+    public function clearProduct()
+    {
+        $this->productId = '';
+        $this->productName = '';
+        $this->batchId = '';
+        $this->systemQty = 0;
+        $this->physicalQty = '';
+    }
     public function save()
     {
         if (\Illuminate\Support\Facades\Auth::user()->role !== 'admin') {
             abort(403, 'Akses ditolak');
         }
-        // 1. Validasi input
         $this->validate([
             'productId' => 'required',
             'batchId' => 'required',
@@ -63,23 +96,18 @@ class StockOpname extends Component
 
         $difference = $this->physicalQty - $this->systemQty;
 
-        // Kalau fisiknya sama persis dengan sistem, buat apa diopname? Tolak!
         if ($difference == 0) {
             session()->flash('error', 'Stok fisik sama persis dengan sistem. Tidak ada yang perlu disesuaikan.');
             return;
         }
 
         try {
-            // 2. Bungkus dalam Database Transaction untuk keamanan kelas Enterprise
             DB::transaction(function () use ($difference) {
-                // Kunci baris batch ini agar tidak ada transaksi kasir yang masuk saat kita opname
                 $batch = ProductBatch::lockForUpdate()->findOrFail($this->batchId);
 
-                // Cek ulang stok sistem saat ini (berjaga-jaga kalau pas detik ini ada kasir yang jualan)
                 $actualSystemQty = $batch->stock;
                 $actualDifference = $this->physicalQty - $actualSystemQty;
 
-                // A. Buat Jurnal Penyesuaian
                 StockAdjustment::create([
                     'product_id' => $this->productId,
                     'product_batch_id' => $this->batchId,
@@ -90,7 +118,6 @@ class StockOpname extends Component
                     'reason' => $this->reason,
                 ]);
 
-                // B. Timpa stok lama dengan stok fisik yang baru
                 $batch->update(['stock' => $this->physicalQty]);
             });
 
@@ -104,15 +131,9 @@ class StockOpname extends Component
 
     public function render()
     {
-        // Hanya ambil produk yang punya relasi batch
-        $products = Product::whereHas('batches')->orderBy('name')->get();
-        
-        // Ambil batch dari produk yang dipilih
         $batches = $this->productId ? ProductBatch::where('product_id', $this->productId)->orderBy('expired_date')->get() : [];
-        
-        // Ambil histori opname terbaru
         $recentAdjustments = StockAdjustment::with(['product', 'batch', 'user'])->latest()->take(6)->get();
 
-        return view('livewire.inventory.stock-opname', compact('products', 'batches', 'recentAdjustments'));
+        return view('livewire.inventory.stock-opname', compact('batches', 'recentAdjustments'));
     }
 }

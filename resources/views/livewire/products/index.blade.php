@@ -28,13 +28,40 @@
 
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
         
-        <div class="p-5 border-b border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col sm:flex-row justify-between gap-4">
-            <div class="relative w-full sm:w-96">
+        <div class="mb-6 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col md:flex-row gap-4 items-center justify-between">
+        
+            <div class="w-full md:w-1/3 relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" class="text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 </div>
-                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari nama obat atau SKU..." 
-                    class="w-full pl-10 p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-800 dark:text-white transition-colors text-sm">
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Cari SKU atau Nama Obat..." 
+                    class="w-full pl-10 p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium text-gray-800 dark:text-white transition-all">
+            </div>
+
+            <div class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
+                
+                <select wire:model.live="filterStock" class="p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-bold text-gray-700 dark:text-gray-300 transition-all cursor-pointer">
+                    <option value="">
+                        Semua Status Stok
+                    </option>
+                    <option value="tersedia" class="text-green-600">Tersedia (Ada Stok)</option>
+                    <option value="habis" class="text-red-600">Habis (Kosong)</option>
+                </select>
+
+                <select wire:model.live="filterCategory" class="p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-bold text-gray-700 dark:text-gray-300 transition-all cursor-pointer">
+                    <option value="">Semua Golongan</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
+                </select>
+
+                <select wire:model.live="filterUnit" class="p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-bold text-gray-700 dark:text-gray-300 transition-all cursor-pointer">
+                    <option value="">Semua Satuan</option>
+                    @foreach($units as $unit)
+                        <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                    @endforeach
+                </select>
+                
             </div>
         </div>
 
@@ -42,11 +69,43 @@
             <table class="w-full min-w-[900px] text-left border-collapse">
                 <thead class="bg-gray-50/80 dark:bg-slate-900/50 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-slate-700">
                     <tr>
-                        <th class="px-6 py-4 font-semibold">SKU / Barcode</th>
-                        <th class="px-6 py-4 font-semibold">Nama Obat</th>
+                        <th wire:click="sortBy('sku')" class="px-6 py-4 font-semibold cursor-pointer hover:bg-gray-200 dark:hover:bg-slate-800 transition-colors group select-none">
+                            <div class="flex items-center gap-2">
+                                SKU / Barcode
+                                @if($sortColumn === 'sku')
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500 transition-transform {{ $sortDirection === 'desc' ? 'rotate-180' : '' }}"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
+                                @else
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-0 group-hover:opacity-50 transition-opacity"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
+                                @endif
+                            </div>
+                        </th>
+                        
+                        <th wire:click="sortBy('name')" class="px-6 py-4 font-semibold cursor-pointer hover:bg-gray-200 dark:hover:bg-slate-800 transition-colors group select-none">
+                            <div class="flex items-center gap-2">
+                                Nama Obat
+                                @if($sortColumn === 'name')
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500 transition-transform {{ $sortDirection === 'desc' ? 'rotate-180' : '' }}"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
+                                @else
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-0 group-hover:opacity-50 transition-opacity"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
+                                @endif
+                            </div>
+                        </th>
+
                         <th class="px-6 py-4 font-semibold">Golongan</th>
-                        <th class="px-6 py-4 font-semibold text-right">Harga Jual</th>
+
+                        <th wire:click="sortBy('selling_price')" class="px-6 py-4 font-semibold cursor-pointer hover:bg-gray-200 dark:hover:bg-slate-800 transition-colors group select-none text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                @if($sortColumn === 'selling_price')
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500 transition-transform {{ $sortDirection === 'desc' ? 'rotate-180' : '' }}"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
+                                @else
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-0 group-hover:opacity-50 transition-opacity"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
+                                @endif
+                                Harga Jual
+                            </div>
+                        </th>
+
                         <th class="px-6 py-4 font-semibold text-center">Stok Total</th>
+
                         @if(auth()->user()->role === 'admin')
                         <th class="px-6 py-4 font-semibold text-center w-24">Aksi</th>
                         @endif
@@ -87,7 +146,7 @@
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-green-50 text-green-700 font-bold text-sm border border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20">
                                     {{ $product->stock }} <span class="font-normal text-xs">{{ $product->unit->short_name }}</span>
                                 </span>
-                            @elseif($product->stock > 0)
+                            @elseif($product->stock >= 1)
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-yellow-50 text-yellow-700 font-bold text-sm border border-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20">
                                     {{ $product->stock }} <span class="font-normal text-xs">{{ $product->unit->short_name }}</span>
                                 </span>

@@ -20,7 +20,6 @@ class Show extends Component
     public $voidReason = ''; 
 
     public function mount($id){
-        // Load Sale beserta detail produk, kasir, dan pelanggan
         $this->sale = Sale::with(['details.product', 'user', 'customer'])->findOrFail($id); 
     }
     
@@ -51,7 +50,6 @@ class Show extends Component
                     }
                 }
 
-                // Koreksi uang laci HANYA jika pembayarannya CASH
                 if ($this->sale->payment_method === 'cash') {
                     $shift = CashierShift::where('user_id', $this->sale->user_id)
                                 ->where('status', 'open')

@@ -11,10 +11,8 @@ class CheckRole
 {
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        // Cek apakah user belum login ATAU role-nya tidak ada di daftar yang diizinkan
         if (!Auth::check() || !in_array(Auth::user()->role, $roles)) {
             
-            // Arahkan ke rute yang aman jika mereka nyasar
             $userRole = Auth::check() ? Auth::user()->role : '';
             
             if ($userRole === 'kasir') {

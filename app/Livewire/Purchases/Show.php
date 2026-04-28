@@ -14,7 +14,6 @@ class Show extends Component
 
     public function mount($id)
     {
-        // Load purchase beserta relasinya
         $this->purchase = Purchase::with(['supplier', 'details.product', 'user'])->findOrFail($id);
     }
 

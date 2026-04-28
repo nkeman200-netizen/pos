@@ -17,7 +17,6 @@ class Index extends Component
 
     public $search = '';
 
-    // Reset pagination ketika user mengetik di kotak pencarian
     public function updatingSearch()
     {
         $this->resetPage();
@@ -30,10 +29,9 @@ class Index extends Component
         }
         $po = PurchaseOrder::findOrFail($id);
         
-        // Opsional: Cuma PO yang masih 'pending' yang bisa dihapus
         if ($po->status === 'pending') {
-            $po->items()->delete(); // Hapus detail itemnya dulu
-            $po->delete();          // Baru hapus PO-nya
+            $po->items()->delete(); 
+            $po->delete();          
             session()->flash('success', 'Purchase Order berhasil dihapus!');
         } else {
             session()->flash('error', 'Hanya PO Pending yang bisa dihapus!');

@@ -17,24 +17,21 @@ class PurchaseOrder extends Model
         'user_id',
         'order_date',
         'expected_date',
-        'status', // 'pending', 'received', 'cancelled'
+        'status', 
         'total_amount',
         'notes'
     ];
 
-    // Relasi ke Supplier
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
     }
 
-    // Relasi ke User (Apoteker yang bikin)
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relasi ke Item Obat
     public function items()
     {
         return $this->hasMany(PurchaseOrderItem::class);

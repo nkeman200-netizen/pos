@@ -44,7 +44,6 @@ class Index extends Component
             'pin' => 'nullable|digits:6',
         ];
 
-        // Password wajib jika tambah baru, opsional jika edit
         if (!$this->isEdit) {
             $rules['password'] = 'required|min:8';
         }
@@ -71,7 +70,6 @@ class Index extends Component
 
     public function render()
     {
-        // Hanya Admin dan Owner yang boleh akses halaman ini
         abort_if(!in_array(auth()->user()->role, ['admin', 'owner']), 403);
         
         $users = User::orderBy('role')->orderBy('name')->get();

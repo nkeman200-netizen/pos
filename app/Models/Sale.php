@@ -9,8 +9,6 @@ class Sale extends Model
 {
     use Auditable;
     
-    // TAMBAHAN: Masukkan 'status' dan 'void_reason' ke dalam fillable
-    // Cari bagian ini dan tambahkan dua baris di bawahnya
     protected $fillable = [
         'invoice_number', 
         'total_price', 
@@ -20,23 +18,20 @@ class Sale extends Model
         'customer_id',
         'status',          
         'void_reason',
-        'payment_method',     // <-- TAMBAHKAN INI
-        'payment_reference'   // <-- TAMBAHKAN INI
+        'payment_method',     
+        'payment_reference'   
     ];
 
-    // Relasi ke Kasir
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relasi ke Pelanggan
     public function customer()
     {
         return $this->belongsTo(Customer::class);
     }
 
-    // Relasi ke Detail (Isi keranjang) satu sale punya banyak details
     public function details()
     {
         return $this->hasMany(SaleItem::class);

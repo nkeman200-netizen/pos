@@ -17,7 +17,6 @@
         @php 
             $apotek = \App\Models\PharmacyProfile::first(); 
             $logoBase64 = null;
-            // Cek apakah logo ada dan file fisiknya benar-benar ada di server
             if($apotek && $apotek->logo && file_exists(public_path('storage/' . $apotek->logo))) {
                 $type = pathinfo(public_path('storage/' . $apotek->logo), PATHINFO_EXTENSION);
                 $data = file_get_contents(public_path('storage/' . $apotek->logo));

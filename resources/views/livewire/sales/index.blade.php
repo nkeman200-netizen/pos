@@ -51,7 +51,7 @@
                         <td class="px-6 py-4 text-right">
                             <span class="font-black text-gray-800 dark:text-gray-100 text-sm font-mono">Rp{{ number_format($sale->total_price) }}</span>
                         </td>
-                        <td class="px-5 py-4">
+                        <td class="px-6 py-4">
                             @if($sale->status === 'void')
                                 <span class="px-3 py-1 text-xs font-bold bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 rounded-full border border-red-200 dark:border-red-500/30 inline-flex items-center gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -62,10 +62,6 @@
                                     Lunas
                                 </span>
                             @endif
-                        </td>
-
-                        <td class="px-5 py-4 text-right font-black text-sm font-mono {{ $sale->status === 'void' ? 'text-gray-400 line-through' : 'text-gray-800 dark:text-gray-100' }}">
-                            Rp{{ number_format($sale->total_price) }}
                         </td>
                         <td class="px-6 py-4 text-center">
                             <a href="{{ route('sales.show', $sale) }}" class="inline-flex p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 rounded-lg transition-colors border border-indigo-100 dark:border-indigo-500/20 shadow-sm" title="Lihat Struk">
