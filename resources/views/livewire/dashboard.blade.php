@@ -170,10 +170,11 @@
     </div>
 
     @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts" data-navigate-once></script>
+    
     <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('chartData', () => ({
+        window.chartData = function() {
+            return {
                 categories: {!! $chartCategories !!},
                 seriesData: {!! $chartData !!},
                 
@@ -244,8 +245,8 @@
                         });
                     });
                 }
-            }));
-        });
+            };
+        };
     </script>
     @endpush
 
