@@ -57,14 +57,14 @@
                     @endif
                 </div>
 
-                <div class="flex gap-2 w-full md:w-auto">
-                    <label class="flex-1 md:flex-none cursor-pointer px-5 py-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all border border-emerald-100 dark:border-emerald-500/20">
+                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                    <label class="w-full sm:w-auto cursor-pointer px-5 py-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all border border-emerald-100 dark:border-emerald-500/20">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                         Import Excel
                         <input type="file" wire:model.live="excelFile" class="hidden" accept=".csv,.xlsx,.xls">
                     </label>
 
-                    <label class="flex-1 md:flex-none cursor-pointer px-5 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/20">
+                    <label class="w-full sm:w-auto cursor-pointer px-5 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/20">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                         AI Scanner
                         <input type="file" wire:model.live="receiptImage" class="hidden" accept="image/*">

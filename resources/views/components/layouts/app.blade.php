@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" 
-        x-data="{ isDark: localStorage.getItem('theme') === 'dark', sidebarCollapsed: false }" 
+        x-data="{ isDark: localStorage.getItem('theme') === 'dark', sidebarCollapsed: window.innerWidth < 768 }" 
         x-init="$watch('isDark', val => localStorage.setItem('theme', val ? 'dark' : 'light'))" 
         :class="{ 'dark': isDark }">
 <head>
@@ -33,8 +33,8 @@
 <body class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-200 antialiased transition-colors duration-300 flex h-screen overflow-hidden">
     @php $apotek = \App\Models\PharmacyProfile::first(); @endphp
 
-    <aside class="bg-white dark:bg-slate-900 border-r border-gray-100 dark:border-slate-800 flex flex-col transition-all duration-300 z-20" :class="sidebarCollapsed ? 'w-20' : 'w-64'">
-        
+    <div x-show="!sidebarCollapsed" class="md:hidden fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm" @click="sidebarCollapsed = true" x-cloak></div>
+    <aside class="bg-white dark:bg-slate-900 border-r border-gray-100 dark:border-slate-800 flex flex-col transition-all duration-300 z-50 fixed md:relative h-full" :class="sidebarCollapsed ? '-translate-x-full md:translate-x-0 md:w-20' : 'translate-x-0 w-64'">
         <div class="h-16 flex items-center justify-center border-b border-gray-100 dark:border-slate-800 shrink-0">
             <span x-show="!sidebarCollapsed" class="font-black text-xl tracking-tight text-indigo-600 dark:text-indigo-400">APOTEK <span class="text-gray-800 dark:text-white">{{ $apotek->name ?? 'Apotek' }}</span></span>
             <span x-show="sidebarCollapsed" class="font-black text-xl text-indigo-600">{{ strtoupper(substr($apotek->name ?? 'A', 0, 1)) }}</span>

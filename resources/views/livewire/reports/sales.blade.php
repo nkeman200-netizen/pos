@@ -55,19 +55,20 @@
             </button>
         </div>
 
-        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-wrap items-center gap-4">
-            <div class="flex items-center gap-3 w-full sm:w-auto">
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col md:flex-row items-start md:items-center gap-4">
+            
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
                 <span class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest hidden sm:block">Periode</span>
-                <input type="date" wire:model.live="startDate" class="[color-scheme:light] dark:[color-scheme:dark] p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold w-full sm:w-auto">
-                <span class="text-gray-300">s/d</span>
-                <input type="date" wire:model.live="endDate" class="[color-scheme:light] dark:[color-scheme:dark] p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold w-full sm:w-auto">
+                <input type="date" wire:model.live="startDate" class="w-full sm:w-auto [color-scheme:light] dark:[color-scheme:dark] p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold">
+                <span class="text-gray-300 hidden sm:block">s/d</span>
+                <input type="date" wire:model.live="endDate" class="w-full sm:w-auto [color-scheme:light] dark:[color-scheme:dark] p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold">
             </div>
             
-            <div class="hidden sm:block w-px h-8 bg-gray-200 dark:bg-slate-700"></div>
+            <div class="hidden md:block w-px h-8 bg-gray-200 dark:bg-slate-700"></div>
 
-            <div class="flex items-center gap-3 w-full sm:w-auto">
-                <span class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Tampilan</span>
-                <select wire:model.live="frequency" class="p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold w-full sm:w-auto">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
+                <span class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest hidden sm:block">Tampilan</span>
+                <select wire:model.live="frequency" class="w-full sm:w-auto p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold">
                     <option value="detail">Struk per Struk (Detail)</option>
                     <option value="daily">Rekap Harian</option>
                     <option value="monthly">Rekap Bulanan</option>

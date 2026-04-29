@@ -12,24 +12,27 @@
             </button>
         </div>
 
-        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-wrap items-end gap-4">
-            <div>
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col md:flex-row items-start md:items-end gap-4">
+            
+            <div class="w-full md:w-auto">
                 <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Filter Kasir</label>
-                <select wire:model.live="userId" class="p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold min-w-[200px]">
+                <select wire:model.live="userId" class="w-full md:w-48 p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold">
                     <option value="">Semua Kasir</option>
                     @foreach($kasirs as $k)
                         <option value="{{ $k->id }}">{{ $k->name }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="flex-1">
+            
+            <div class="w-full md:w-auto">
                 <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Periode Shift</label>
-                <div class="flex items-center gap-3 max-w-md">
-                    <input type="date" wire:model.live="startDate" class="w-full p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold [color-scheme:light] dark:[color-scheme:dark]">
-                    <span class="text-gray-300 font-bold">s/d</span>
-                    <input type="date" wire:model.live="endDate" class="w-full p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold [color-scheme:light] dark:[color-scheme:dark]">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <input type="date" wire:model.live="startDate" class="w-full sm:w-auto p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold [color-scheme:light] dark:[color-scheme:dark]">
+                    <span class="text-gray-300 font-bold hidden sm:block">s/d</span>
+                    <input type="date" wire:model.live="endDate" class="w-full sm:w-auto p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-sm font-bold [color-scheme:light] dark:[color-scheme:dark]">
                 </div>
             </div>
+
         </div>
     </div>
 

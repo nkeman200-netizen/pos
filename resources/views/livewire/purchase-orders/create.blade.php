@@ -36,7 +36,7 @@
         
         <div class="xl:col-span-2 flex flex-col gap-6">
             
-            <div class="bg-indigo-600 dark:bg-indigo-900 p-6 rounded-2xl shadow-lg relative z-50">
+            <div class="bg-indigo-600 dark:bg-indigo-900 p-6 rounded-2xl shadow-lg relative z-30">
                 <label class="block text-sm font-bold text-indigo-100 mb-2">Cari Manual Nama Obat / SKU</label>
                 <input type="text" wire:model.live.debounce.300ms="searchQuery" placeholder="Ketik nama obat..." class="w-full p-4 bg-white dark:bg-slate-800 dark:text-white border-2 border-transparent dark:border-slate-700 rounded-xl outline-none focus:border-indigo-400 transition-all font-bold">
                 
