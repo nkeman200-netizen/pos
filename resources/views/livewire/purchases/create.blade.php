@@ -104,7 +104,7 @@
                                                         class="w-full p-2 text-xs font-bold bg-white dark:bg-slate-900 border-2 border-indigo-400 dark:border-indigo-500 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 shadow-lg text-gray-800 dark:text-white transition-all">
                                                     
                                                     @if(!empty($rowSearchResults))
-                                                        <div class="absolute z-[60] w-[250px] mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 shadow-xl rounded-lg overflow-hidden">
+                                                        <div class="absolute z-[40] w-[250px] mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 shadow-xl rounded-lg overflow-hidden">
                                                             @foreach($rowSearchResults as $res)
                                                                 <div wire:click="updateProductMapping({{ $index }}, {{ $res->id }})" class="p-3 border-b border-gray-50 dark:border-slate-700/50 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 cursor-pointer flex justify-between items-center group transition">
                                                                     <div>
