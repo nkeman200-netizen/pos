@@ -2,27 +2,21 @@
     
     <style>
         @media print {
-            /* 1. Atur ukuran kertas wajib A4 dan beri jarak aman (margin) */
             @page { size: A4 portrait; margin: 1cm; }
             
-            /* 2. HANCURKAN margin sidebar yang bikin gepeng ke kanan! */
             body, html, main { 
                 background-color: #ffffff !important; 
                 margin: 0 !important; 
                 padding: 0 !important; 
                 position: static !important;
             }
-            
-            /* 3. Sembunyikan UI Web */
             body * { visibility: hidden; }
             
-            /* 4. Tampilkan HANYA Laporan */
             #area-laporan, #area-laporan * { 
                 visibility: visible; 
-                color: #000000 !important; /* Paksa tinta printer jadi hitam pekat */
+                color: #000000 !important; 
             }
             
-            /* 5. Paksa Laporan merapat ke kiri atas layar kertas */
             #area-laporan {
                 position: absolute !important;
                 left: 0 !important;
@@ -33,10 +27,8 @@
                 margin: 0 !important;
             }
             
-            /* 6. Hilangkan elemen yg punya class no-print */
             .no-print { display: none !important; }
             
-            /* 7. Pertegas garis tabel agar rapi saat dicetak */
             table { border-collapse: collapse !important; width: 100% !important; }
             th, td { border: 1px solid #94a3b8 !important; padding: 10px !important; }
             th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
