@@ -43,7 +43,7 @@
                         class="w-full pl-11 p-3.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold dark:text-white text-sm">
                     
                     @if(!empty($this->searchResults))
-                        <div class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 shadow-2xl rounded-xl overflow-hidden">
+                        <div class="absolute z-20 w-full mt-2 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 shadow-2xl rounded-xl overflow-hidden">
                             @foreach($this->searchResults as $res)
                                 <div wire:click="addToCart({{ $res->id }})" class="p-4 border-b border-gray-50 dark:border-slate-700/50 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 cursor-pointer flex justify-between items-center group">
                                     <div>

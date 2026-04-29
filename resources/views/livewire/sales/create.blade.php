@@ -286,7 +286,7 @@
         class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
         <div x-show="showQrisModal" x-transition.scale.95 class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border border-gray-100 dark:border-slate-700">
             <h3 class="text-xl font-black text-gray-800 dark:text-white mb-2 uppercase tracking-tighter">Scan & Bayar</h3>
-            <p class="text-sm text-gray-500 mb-8 font-medium">Apotek Sofya - QRIS Dinamis</p>
+            <p class="text-sm text-gray-500 mb-8 font-medium">Apotek {{ $apotek->name }} - QRIS Dinamis</p>
             
             <div class="flex justify-center p-5 bg-white rounded-3xl border-2 border-gray-50 mb-8 shadow-inner">
                 @if($qrisString)

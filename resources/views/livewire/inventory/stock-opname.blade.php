@@ -87,7 +87,7 @@
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-indigo-500 mb-1 uppercase tracking-widest">Stok Fisik (Riil)</label>
-                            <input type="number" wire:model.live.debounce.300ms="physicalQty" class="w-full p-2 bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-500/50 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-2xl font-black font-mono text-indigo-600" {{ !$batchId ? 'disabled' : '' }}>
+                            <input type="number" wire:model.live.debounce.300ms="physicalQty" onfocus="this.select()" class="w-full p-2 bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-500/50 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-colors text-2xl font-black font-mono text-indigo-600" {{ !$batchId ? 'disabled' : '' }}>
                             @error('physicalQty') <span class="text-xs font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
                         </div>
                         

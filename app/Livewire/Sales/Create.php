@@ -73,6 +73,7 @@ class Create extends Component
         return Product::with(['unit', 'batches'])
             ->where('name', 'like', '%' . $this->searchQuery . '%')
             ->orWhere('sku', 'like', '%' . $this->searchQuery . '%')
+            ->take(5)
             ->get();
     }
 
@@ -382,6 +383,7 @@ class Create extends Component
     public function render()
     {
         $customers = Customer::orderBy('name')->get(); 
-        return view('livewire.sales.create', compact('customers'));
+        $apotek=PharmacyProfile::first();
+        return view('livewire.sales.create', compact('customers','apotek'));
     }
 }

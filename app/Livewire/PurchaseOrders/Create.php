@@ -51,10 +51,12 @@ class Create extends Component
         set_time_limit(120);
 
         $produkKritis = Product::withSum('batches', 'stock')
-            ->where('min_stock', '>', 0) 
-            ->havingRaw('batches_sum_stock <= min_stock') 
-            ->orHavingRaw('batches_sum_stock IS NULL') 
-            ->get();
+            ->where('min_stock', '>', 0)
+            ->get()
+            ->filter(function ($p) {
+                $stokSekarang = $p->batches_sum_stock ?? 0;
+                return $stokSekarang <= $p->min_stock;
+            });
 
         if ($produkKritis->isEmpty()) {
             session()->flash('success', 'Semua stok obat aman sesuai batas minimal!');

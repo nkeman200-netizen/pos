@@ -178,10 +178,18 @@
             </div>
 
         @else
-            <div class="bg-white dark:bg-slate-800 rounded-3xl p-16 text-center border-2 border-dashed border-gray-200 dark:border-slate-700">
-                <div class="inline-flex items-center justify-center w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-full mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 md:p-16 text-center border-2 border-dashed border-gray-200 dark:border-slate-700">
+                
+                <div class="flex justify-center w-full mb-6">
+                    <div class="flex items-center justify-center w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                            <line x1="12" y1="22.08" x2="12" y2="12"/>
+                        </svg>
+                    </div>
                 </div>
+                
                 <h3 class="text-xl font-black text-gray-800 dark:text-gray-200 mb-2">Siap Menganalisa Stok?</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto font-medium">Gunakan fitur Live Search di atas untuk memantau pergerakan mutasi dan rincian expired date per-batch.</p>
             </div>
