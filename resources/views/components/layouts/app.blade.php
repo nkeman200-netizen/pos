@@ -6,8 +6,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS Apotek - Sofya Project</title>
+    <title>Apotek Verotama - Sistem POS</title>
 
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <script>
         function applyDarkMode() {
             if (localStorage.getItem('theme') === 'dark') {
@@ -183,10 +184,24 @@
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto custom-scrollbar relative">
-            <div id="area-print">
+        <main class="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col">
+            
+            <div id="area-print" class="flex-1">
                 {{ $slot }}
             </div>
+
+            <footer class="mt-auto py-5 border-t border-gray-200 dark:border-slate-800 flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-6 print:hidden shrink-0">
+                
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 text-center">
+                    &copy; {{ date('Y') }} <span class="font-black tracking-wide text-indigo-600 dark:text-indigo-400">{{ $apotek->name ?? 'Apotek Verotama' }}</span>. All rights reserved.
+                </p>
+                
+                <div class="hidden sm:block w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-slate-700"></div>
+                <div class="flex items-center gap-4 text-xs font-bold text-gray-400 dark:text-gray-500">
+                    <span class="font-mono tracking-widest uppercase">v1.0.0</span>
+                </div>
+            </footer>
+
         </main>
     </div>
 
