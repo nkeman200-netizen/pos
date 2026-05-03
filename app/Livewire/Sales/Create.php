@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\Sale;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -238,12 +239,7 @@ class Create extends Component
                 }
 
                 foreach ($this->cart as $item) {
-                    $sale->details()->create([
-                        'product_id' => $item['product_id'],
-                        'quantity' => $item['quantity'],
-                        'unit_price' => $item['unit_price'], 
-                        'subtotal' => $item['subtotal']
-                    ]);
+                    
                     
                     $qtyDibutuhkan = $item['quantity'];
                     $batches = ProductBatch::where('product_id', $item['product_id'])
@@ -254,13 +250,26 @@ class Create extends Component
 
                     foreach ($batches as $batch) {
                         if ($qtyDibutuhkan <= 0) break;
+                        $qtyDiambil=0;
                         if ($batch->stock >= $qtyDibutuhkan) {
                             $batch->decrement('stock', $qtyDibutuhkan);
+                            $qtyDiambil=$qtyDibutuhkan;
                             $qtyDibutuhkan = 0; 
                         } else {
+                            $qtyDiambil=$batch->stock;
                             $qtyDibutuhkan -= $batch->stock; 
                             $batch->update(['stock' => 0]); 
                         }
+                        $sale->details()->create([
+                            'product_id' => $item['product_id'],
+                            'product_batch_id' => $batch->id,
+                            'quantity' => $qtyDiambil,
+                            'unit_price' => $item['unit_price'], 
+                            'subtotal' => $item['unit_price']*$qtyDiambil
+                        ]);
+                    }
+                    if($qtyDibutuhkan>0){
+                        throw new \Exception("stok tidak mencukup ".$item['name']);
                     }
                 }
             });

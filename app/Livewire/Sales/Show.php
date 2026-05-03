@@ -42,9 +42,7 @@ class Show extends Component
                 ]);
 
                 foreach ($this->sale->details as $item) {
-                    $batch = ProductBatch::where('product_id', $item->product_id)
-                                ->orderBy('expired_date', 'desc')
-                                ->first();
+                    $batch = ProductBatch::find($item->product_batch_id);
                     if ($batch) {
                         $batch->increment('stock', $item->quantity);
                     }

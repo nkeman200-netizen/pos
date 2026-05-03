@@ -75,7 +75,13 @@
                 <tbody class="divide-y divide-dashed">
                     @foreach($sale->details as $item)
                     <tr>
-                        <td class="py-2">{{ $item->product->name }}<br><span class="text-xs text-gray-400">{{ $item->quantity }} x Rp{{ number_format($item->unit_price) }}</span></td>
+                        <td class="py-2">
+                            {{ $item->product->name }}
+                            <br>
+                            <span class="text-[10px] text-gray-400">
+                                Batch: {{ $item->batch->batch_number }} | {{ $item->quantity }} x Rp{{ number_format($item->unit_price) }}
+                            </span>
+                        </td>
                         <td class="py-2 text-right font-bold">Rp{{ number_format($item->subtotal) }}</td>
                     </tr>
                     @endforeach
@@ -123,6 +129,11 @@
     <div x-show="showVoidModal" x-cloak class="no-print fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md">
             <h2 class="text-xl font-black mb-4">Batalkan Transaksi?</h2>
+            @if (session()->has('void_error'))
+                <div class="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm font-bold border border-red-200">
+                    {{ session('void_error') }}
+                </div>
+            @endif
             <input type="text" wire:model="voidReason" class="w-full p-4 bg-gray-50 font-bold text-gray-700 border rounded-xl mb-6" placeholder="Alasan pembatalan...">
             <div class="flex gap-3">
                 <button @click="showVoidModal = false" class="flex-1 py-3 bg-gray-100 text-gray-500 rounded-xl font-bold">Batal</button>
