@@ -1,6 +1,43 @@
-<div class="p-6 lg:p-8 bg-gray-50 dark:bg-slate-900 min-h-screen transition-colors duration-300">
+<div class="p-6 lg:p-8 bg-gray-50 dark:bg-slate-900 min-h-screen transition-colors duration-300 print:bg-white print:p-0">
     
-    <div class="mb-8">
+    <!-- Blok Style Khusus Cetak (Membajak Layar) -->
+    <style>
+        @media print {
+            @page { size: A4 portrait; margin: 1cm; }
+            
+            body, html, main { 
+                background-color: #ffffff !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                position: static !important;
+            }
+            body * { visibility: hidden; }
+            
+            #area-laporan, #area-laporan * { 
+                visibility: visible; 
+                color: #000000 !important; 
+            }
+            
+            #area-laporan {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .no-print { display: none !important; }
+            
+            table { border-collapse: collapse !important; width: 100% !important; }
+            th, td { border: 1px solid #94a3b8 !important; padding: 10px !important; }
+            th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+
+    <!-- Header & Filter (Sembunyi saat dicetak berkat class no-print) -->
+    <div class="mb-8 no-print">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div>
                 <h2 class="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight">Laporan Shift Kasir</h2>
@@ -36,78 +73,90 @@
         </div>
     </div>
 
-    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-gray-50 dark:bg-slate-900/50 text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-slate-700 font-black">
-                    <tr>
-                        <th class="px-5 py-4 w-40">Tanggal & Jam</th>
-                        <th class="px-5 py-4">Kasir</th>
-                        <th class="px-5 py-4 text-right">Modal Awal</th>
-                        <th class="px-5 py-4 text-right">Est. Sistem</th>
-                        <th class="px-5 py-4 text-right">Fisik Laci</th>
-                        <th class="px-5 py-4 text-center">Selisih</th>
-                        <th class="px-5 py-4 text-center">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-slate-700/50">
-                    @forelse($shifts as $shift)
-                        @php
-                            $selisih = $shift->actual_cash - $shift->expected_cash;
-                            $isClosed = $shift->status === 'closed';
-                        @endphp
-                    <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                        <td class="px-5 py-4">
-                            <div class="text-xs font-bold text-gray-800 dark:text-gray-100">{{ $shift->start_time->format('d M Y') }}</div>
-                            <div class="text-[11px] font-mono text-gray-500 mt-1">
-                                {{ $shift->start_time->format('H:i') }} - {{ $isClosed ? $shift->end_time->format('H:i') : 'Sekarang' }}
-                            </div>
-                        </td>
-                        <td class="px-5 py-4">
-                            <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400">{{ $shift->user->name }}</span>
-                        </td>
-                        <td class="px-5 py-4 text-right text-xs font-bold text-gray-600 dark:text-gray-400 font-mono">
-                            Rp{{ number_format($shift->starting_cash) }}
-                        </td>
-                        <td class="px-5 py-4 text-right text-sm font-black text-gray-800 dark:text-gray-100 font-mono">
-                            Rp{{ number_format($shift->expected_cash) }}
-                        </td>
-                        <td class="px-5 py-4 text-right text-sm font-black text-blue-600 dark:text-blue-400 font-mono">
-                            {{ $isClosed ? 'Rp' . number_format($shift->actual_cash) : '-' }}
-                        </td>
-                        <td class="px-5 py-4 text-center">
-                            @if(!$isClosed)
-                                <span class="text-gray-400 text-xs italic">-</span>
-                            @elseif($selisih == 0)
-                                <span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 rounded text-xs font-bold">Balance</span>
-                            @elseif($selisih > 0)
-                                <span class="px-2.5 py-1 bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 rounded text-xs font-bold">+ Rp{{ number_format($selisih) }}</span>
-                            @else
-                                <span class="px-2.5 py-1 bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 rounded text-xs font-bold">- Rp{{ number_format(abs($selisih)) }}</span>
-                            @endif
-                        </td>
-                        <td class="px-5 py-4 text-center">
-                            @if($isClosed)
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-gray-300 text-xs font-bold">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-gray-500"></div> Selesai
-                                </span>
-                            @else
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 text-xs font-bold">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></div> Aktif
-                                </span>
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" class="py-12 text-center text-gray-500 dark:text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 mb-3 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            <span class="font-bold">Belum ada data shift untuk periode ini.</span>
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+    <!-- Area yang Akan Dicetak (Dilindungi oleh div id="area-laporan") -->
+    <div id="area-laporan">
+        
+        <!-- Judul Kop Laporan Khusus Muncul di Kertas -->
+        <div class="hidden print:block text-center mb-8 pb-4 border-b-4 border-double border-gray-800">
+            <h1 class="text-2xl font-black uppercase">LAPORAN SHIFT KASIR</h1>
+            <p class="text-sm font-bold italic mt-1">Periode: {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d M Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d M Y') }}</p>
+            @if($userId)
+                <p class="text-xs font-bold mt-1">Filter Kasir: {{ $kasirs->firstWhere('id', $userId)->name ?? 'Semua' }}</p>
+            @endif
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm overflow-hidden print:border-none print:shadow-none print:rounded-none">
+            <div class="overflow-x-auto print:overflow-visible">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 dark:bg-slate-900/50 text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-slate-700 font-black">
+                        <tr>
+                            <th class="px-5 py-4 w-40">Tanggal & Jam</th>
+                            <th class="px-5 py-4">Kasir</th>
+                            <th class="px-5 py-4 text-right">Modal Awal</th>
+                            <th class="px-5 py-4 text-right">Est. Sistem</th>
+                            <th class="px-5 py-4 text-right">Fisik Laci</th>
+                            <th class="px-5 py-4 text-center">Selisih</th>
+                            <th class="px-5 py-4 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-slate-700/50">
+                        @forelse($shifts as $shift)
+                            @php
+                                $selisih = $shift->actual_cash - $shift->expected_cash;
+                                $isClosed = $shift->status === 'closed';
+                            @endphp
+                        <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors print:break-inside-avoid">
+                            <td class="px-5 py-4">
+                                <div class="text-xs font-bold text-gray-800 dark:text-gray-100">{{ $shift->start_time->format('d M Y') }}</div>
+                                <div class="text-[11px] font-mono text-gray-500 mt-1">
+                                    {{ $shift->start_time->format('H:i') }} - {{ $isClosed ? $shift->end_time->format('H:i') : 'Sekarang' }}
+                                </div>
+                            </td>
+                            <td class="px-5 py-4">
+                                <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400">{{ $shift->user->name }}</span>
+                            </td>
+                            <td class="px-5 py-4 text-right text-xs font-bold text-gray-600 dark:text-gray-400 font-mono">
+                                Rp{{ number_format($shift->starting_cash) }}
+                            </td>
+                            <td class="px-5 py-4 text-right text-sm font-black text-gray-800 dark:text-gray-100 font-mono">
+                                Rp{{ number_format($shift->expected_cash) }}
+                            </td>
+                            <td class="px-5 py-4 text-right text-sm font-black text-blue-600 dark:text-blue-400 font-mono">
+                                {{ $isClosed ? 'Rp' . number_format($shift->actual_cash) : '-' }}
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                @if(!$isClosed)
+                                    <span class="text-gray-400 text-xs italic">-</span>
+                                @elseif($selisih == 0)
+                                    <span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 rounded text-xs font-bold print:bg-transparent print:p-0">Balance</span>
+                                @elseif($selisih > 0)
+                                    <span class="px-2.5 py-1 bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 rounded text-xs font-bold print:bg-transparent print:p-0">+ Rp{{ number_format($selisih) }}</span>
+                                @else
+                                    <span class="px-2.5 py-1 bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 rounded text-xs font-bold print:bg-transparent print:p-0">- Rp{{ number_format(abs($selisih)) }}</span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                @if($isClosed)
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-gray-300 text-xs font-bold print:bg-transparent print:p-0">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-gray-500 print:hidden"></div> Selesai
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 text-xs font-bold print:bg-transparent print:p-0">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse print:hidden"></div> Aktif
+                                    </span>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="7" class="py-12 text-center text-gray-500 dark:text-gray-400">
+                                <span class="font-bold">Belum ada data shift untuk periode ini.</span>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
