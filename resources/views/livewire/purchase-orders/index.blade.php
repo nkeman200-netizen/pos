@@ -62,15 +62,18 @@
                         </td>
                         @if(auth()->user()->role === 'admin')
                         <td class="px-5 py-4 text-center">
-                            <div class="flex items-center justify-center {{ $po->status === 'pending' ? 'gap-2' : 'gap-1' }}">
+                            <div class="flex items-center justify-center gap-2">
                                 <a href="{{ route('purchase-orders.show', $po->id) }}" class="p-2 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition" title="Lihat Detail">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                                 </a>
-                                @if($po->status === 'pending')
-                                <button onclick="confirm('Yakin ingin membatalkan PO ini?') || event.stopImmediatePropagation()" wire:click="delete({{ $po->id }})" class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition" title="Hapus/Batal">
+                                <button 
+                                    {{ $po->status === 'pending' ? '' : 'disabled' }} 
+                                    onclick="confirm('Yakin ingin membatalkan PO ini?') || event.stopImmediatePropagation()" 
+                                    wire:click="delete({{ $po->id }})" 
+                                    class="p-2 rounded-lg transition text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 disabled:opacity-30 disabled:text-gray-500 disabled:hover:bg-transparent disabled:cursor-not-allowed" 
+                                    title="{{ $po->status === 'pending' ? 'Hapus/Batal' : 'Hanya PO Pending yang bisa dihapus' }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                                 </button>
-                                @endif
                             </div>
                         </td>
                         @endif
