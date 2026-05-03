@@ -1,6 +1,5 @@
 <div class="p-6 lg:p-8 bg-gray-50 dark:bg-slate-900 min-h-screen transition-colors duration-300 print:bg-white print:p-0">
     
-    <!-- Blok Style Khusus Cetak (Membajak Layar) -->
     <style>
         @media print {
             @page { size: A4 portrait; margin: 1cm; }
@@ -36,7 +35,6 @@
         }
     </style>
 
-    <!-- Header & Filter (Sembunyi saat dicetak berkat class no-print) -->
     <div class="mb-8 no-print">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div>
@@ -73,10 +71,8 @@
         </div>
     </div>
 
-    <!-- Area yang Akan Dicetak (Dilindungi oleh div id="area-laporan") -->
     <div id="area-laporan">
         
-        <!-- Judul Kop Laporan Khusus Muncul di Kertas -->
         <div class="hidden print:block text-center mb-8 pb-4 border-b-4 border-double border-gray-800">
             <h1 class="text-2xl font-black uppercase">LAPORAN SHIFT KASIR</h1>
             <p class="text-sm font-bold italic mt-1">Periode: {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d M Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d M Y') }}</p>
