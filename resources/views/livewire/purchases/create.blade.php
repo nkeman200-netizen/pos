@@ -192,7 +192,7 @@
 
                     <div>
                         <label class="block text-[10px] font-black text-gray-400 uppercase mb-1.5 tracking-widest">Hubungkan ke PO (Opsional)</label>
-                        <select wire:model="purchase_order_id" class="w-full p-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm dark:text-white italic">
+                        <select wire:model.live="purchase_order_id" class="w-full p-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm dark:text-white italic">
                             <option value="">Tanpa Purchase Order</option>
                             @foreach($purchaseOrders as $po)
                                 <option value="{{ $po->id }}">{{ $po->po_number }} - {{ $po->supplier->name }}</option>

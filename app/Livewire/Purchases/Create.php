@@ -374,6 +374,56 @@ class Create extends Component
             $this->rowSearchResults = [];
         }
     }
+
+    public function updatedPurchaseOrderId($poId)
+    {
+        // 1. Kosongkan keranjang terlebih dahulu agar tidak menumpuk
+        $this->items = []; 
+        $this->supplier_id = '';
+        $this->tax = 0;
+
+        // 2. Jika user memilih "Tanpa Purchase Order" (value kosong)
+        if (empty($poId)) {
+            return; 
+        }
+
+        // 3. Ambil data PO beserta supplier dan item/detailnya
+        $po = PurchaseOrder::with(['supplier', 'items.product.unit'])->find($poId);
+
+        if (!$po) {
+            session()->flash('error', 'Data Purchase Order tidak ditemukan.');
+            return;
+        }
+
+        // 4. Isi otomatis Supplier dan Pajak (jika ada di PO)
+        $this->supplier_id = $po->supplier_id;
+        $this->tax = $po->tax ?? 0; // Sesuaikan jika tabel PO-mu punya kolom tax
+
+        // 5. Pindahkan detail PO ke dalam keranjang
+        foreach ($po->items as $poItem) {
+            
+            $product = $poItem->product;
+            $qty = $poItem->quantity;
+            $price = $poItem->purchase_price ?? 0;
+            $discount = 0; // Diskon biasanya baru ketahuan saat faktur fisik datang
+            
+            $subtotal = ($qty * $price) - $discount;
+
+            $this->items[] = [
+                'product_id' => $product->id ?? null,
+                'name' => $product->name ?? 'Produk Tidak Ditemukan',
+                'unit_name' => $product->unit->short_name ?? '-',
+                'quantity' => $qty,
+                'purchase_price' => $price,
+                'discount' => $discount,
+                'batch_number' => '',  // Biasanya batch baru diisi saat barang datang
+                'expired_date' => '',  // Biasanya ED baru diisi saat barang datang
+                'subtotal' => max(0, $subtotal)
+            ];
+        }
+
+        session()->flash('success', 'Data keranjang berhasil dimuat dari Purchase Order.');
+    }
     
     public function render()
     {
