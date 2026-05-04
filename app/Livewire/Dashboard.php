@@ -21,20 +21,24 @@ class Dashboard extends Component
         $today = Carbon::today();
         $threeMonthsFromNow = Carbon::now()->addMonths(3);
 
-        $salesToday = Sale::whereDate('created_at', $today)->get();
+        $salesToday = Sale::with('details.batch')
+            ->whereDate('created_at', $today)
+            ->where('status', 'completed')
+            ->get();
+
         $omzetHariIni = $salesToday->sum('total_price');
         $transaksiHariIni = $salesToday->count();
 
         $profitHariIni = 0;
         foreach ($salesToday as $sale) {
             foreach ($sale->details as $item) {
-                $modal = $item->product->batches->avg('purchase_price') ?? 0;
+                $modal = $item->batch ? $item->batch->purchase_price : 0;
+                
                 $profitHariIni += ($item->unit_price - $modal) * $item->quantity;
             }
         }
 
         $totalAset = ProductBatch::selectRaw('SUM(stock * purchase_price) as total_aset')->value('total_aset') ?? 0;
-
 
         $last7Days = collect();
         $chartData = collect();
@@ -43,10 +47,11 @@ class Dashboard extends Component
             $date = Carbon::now()->subDays($i);
             $last7Days->push($date->format('d M'));
             
-            $omzet = Sale::whereDate('created_at', $date)->sum('total_price');
+            $omzet = Sale::whereDate('created_at', $date)
+                ->where('status', 'completed')
+                ->sum('total_price');
             $chartData->push((int) $omzet);
         }
-
 
         $obatKritis = Product::with(['category', 'unit'])
             ->withSum('batches as total_stock', 'stock')
@@ -54,7 +59,6 @@ class Dashboard extends Component
             ->orderBy('total_stock', 'asc')
             ->take(5)
             ->get();
-
 
         $obatHampirExpired = ProductBatch::with('product')
             ->where('stock', '>', 0)
