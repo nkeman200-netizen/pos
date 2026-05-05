@@ -1,4 +1,4 @@
-<div class="p-6 lg:p-8 bg-gray-50 dark:bg-slate-900 min-h-screen transition-colors duration-300">
+<div class="p-6 lg:p-8 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
     <style>
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
@@ -159,7 +159,7 @@
                                 <td colspan="8" class="px-5 py-24 text-center">
                                     <div class="flex flex-col items-center">
                                         <div class="w-20 h-20 bg-gray-50 dark:bg-slate-900/50 rounded-full flex items-center justify-center mb-4">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" class="text-gray-300" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="text-gray-300" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                                         </div>
                                         <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200">Keranjang Masih Kosong</h3>
                                         <p class="text-sm text-gray-500 max-w-xs mx-auto">Gunakan kolom pencarian di atas atau Scan Nota menggunakan AI untuk mengisi daftar stok masuk.</p>

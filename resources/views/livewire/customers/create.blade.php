@@ -1,4 +1,4 @@
-<div class="p-6 lg:p-8 bg-gray-50 dark:bg-slate-900 min-h-screen transition-colors duration-300">
+<div class="p-6 lg:p-8 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
     <div class="flex items-center justify-between mb-8">
         <div class="flex items-center gap-4">
             <a href="{{ route('customers.index') }}" class="p-2.5 bg-white dark:bg-slate-800 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 hover:border-indigo-100 dark:hover:border-indigo-500/50 transition-all">

@@ -1,4 +1,4 @@
-<div class="p-6 lg:p-8 bg-gray-50 dark:bg-slate-900 min-h-screen transition-colors duration-300 print:bg-white print:p-0">
+<div class="p-6 lg:p-8 bg-gray-50 dark:bg-slate-900  transition-colors duration-300 print:bg-white print:p-0">
     
     <style>
         @media print {

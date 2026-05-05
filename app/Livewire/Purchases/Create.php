@@ -317,7 +317,7 @@ class Create extends Component
                     $this->items[] = [
                         'product_id' => $product->id,
                         'name' => $product->name,
-                        'unit_name' => $product->unit->short_name ?? '',
+                        'unit_name' => $product->unit->short_name,
                         'quantity' => $qty,
                         'purchase_price' => $price,
                         'discount' => $discount,
@@ -377,17 +377,14 @@ class Create extends Component
 
     public function updatedPurchaseOrderId($poId)
     {
-        // 1. Kosongkan keranjang terlebih dahulu agar tidak menumpuk
         $this->items = []; 
         $this->supplier_id = '';
         $this->tax = 0;
 
-        // 2. Jika user memilih "Tanpa Purchase Order" (value kosong)
         if (empty($poId)) {
             return; 
         }
 
-        // 3. Ambil data PO beserta supplier dan item/detailnya
         $po = PurchaseOrder::with(['supplier', 'items.product.unit'])->find($poId);
 
         if (!$po) {
@@ -395,18 +392,15 @@ class Create extends Component
             return;
         }
 
-        // 4. Isi otomatis Supplier dan Pajak (jika ada di PO)
         $this->supplier_id = $po->supplier_id;
-        $this->tax = $po->tax ?? 0; // Sesuaikan jika tabel PO-mu punya kolom tax
+        $this->tax = $po->tax ?? 0; 
 
-        // 5. Pindahkan detail PO ke dalam keranjang
         foreach ($po->items as $poItem) {
             
             $product = $poItem->product;
             $qty = $poItem->quantity;
             $price = $poItem->purchase_price ?? 0;
-            $discount = 0; // Diskon biasanya baru ketahuan saat faktur fisik datang
-            
+            $discount = 0; 
             $subtotal = ($qty * $price) - $discount;
 
             $this->items[] = [
@@ -416,8 +410,8 @@ class Create extends Component
                 'quantity' => $qty,
                 'purchase_price' => $price,
                 'discount' => $discount,
-                'batch_number' => '',  // Biasanya batch baru diisi saat barang datang
-                'expired_date' => '',  // Biasanya ED baru diisi saat barang datang
+                'batch_number' => '',  
+                'expired_date' => '',  
                 'subtotal' => max(0, $subtotal)
             ];
         }
