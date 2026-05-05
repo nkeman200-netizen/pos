@@ -32,7 +32,7 @@ class Dashboard extends Component
         $profitHariIni = 0;
         foreach ($salesToday as $sale) {
             foreach ($sale->details as $item) {
-                $modal = $item->batch ? $item->batch->purchase_price : 0;
+                $modal =$item->batch->purchase_price;
                 
                 $profitHariIni += ($item->unit_price - $modal) * $item->quantity;
             }
@@ -55,7 +55,7 @@ class Dashboard extends Component
 
         $obatKritis = Product::with(['category', 'unit'])
             ->withSum('batches as total_stock', 'stock')
-            ->having('total_stock', '<', 10) 
+            ->havingRaw('total_stock <= min_stock')
             ->orderBy('total_stock', 'asc')
             ->take(5)
             ->get();
