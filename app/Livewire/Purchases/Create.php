@@ -244,8 +244,8 @@ class Create extends Component
                     'purchase_number' => 'PRC-' . date('YmdHis'),
                     'purchase_date' => now(),
                     'supplier_id' => $this->supplier_id,
-                    'user_id' => Auth::id() ?? 1,
-                    'total_cost' => $this->total, 
+                    'user_id' => Auth::id(),
+                    'total_cost' => $this->total , 
                 ]);
 
                 foreach ($this->items as $item) {

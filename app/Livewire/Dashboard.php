@@ -55,6 +55,7 @@ class Dashboard extends Component
 
         $obatKritis = Product::with(['category', 'unit'])
             ->withSum('batches as total_stock', 'stock')
+            ->groupBy('products.id')
             ->havingRaw('total_stock <= min_stock')
             ->orderBy('total_stock', 'asc')
             ->take(5)

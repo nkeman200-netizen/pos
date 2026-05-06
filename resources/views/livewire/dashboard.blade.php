@@ -134,7 +134,7 @@
                 </div>
                 <div>
                     <h3 class="font-black text-amber-800 dark:text-amber-400">Buku Defecta (Stok Kritis)</h3>
-                    <p class="text-xs font-bold text-amber-600 dark:text-amber-500/80 mt-0.5">Segera lakukan PO (Stok < 10 Pcs)</p>
+                    <p class="text-xs font-bold text-amber-600 dark:text-amber-500/80 mt-0.5">Segera lakukan PO (Stok < stok_minimal)</p>
                 </div>
             </div>
 
