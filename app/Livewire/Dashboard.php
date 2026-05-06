@@ -55,8 +55,7 @@ class Dashboard extends Component
 
         $obatKritis = Product::with(['category', 'unit'])
             ->withSum('batches as total_stock', 'stock')
-            ->groupBy('products.id')
-            ->havingRaw('total_stock <= min_stock')
+            ->whereRaw('(SELECT COALESCE(SUM(stock), 0) FROM product_batches WHERE product_batches.product_id = products.id) <= min_stock')
             ->orderBy('total_stock', 'asc')
             ->take(5)
             ->get();
