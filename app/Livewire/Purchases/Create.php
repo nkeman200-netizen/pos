@@ -265,7 +265,7 @@ class Create extends Component
                     if ($batch) {
                         $batch->increment('stock', $item['quantity']);
                     } else {
-                        ProductBatch::create([
+                        $batch=ProductBatch::create([
                             'product_id' => $item['product_id'],
                             'batch_number' => $item['batch_number'],
                             'expired_date' => $item['expired_date'],
@@ -294,7 +294,8 @@ class Create extends Component
             return redirect()->route('purchases.index');
             
         } catch (\Exception $e) {
-            session()->flash('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+            // session()->flash('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+            dd($e->getMessage());
         }
     }
 
