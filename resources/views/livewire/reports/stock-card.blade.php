@@ -103,18 +103,21 @@
                     </div>
                     
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left border-collapse">
-                            <thead class="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-50 dark:bg-slate-900/50 border-b border-gray-100 dark:border-slate-700 font-black tracking-wider">
-                                <tr>
-                                    <th class="px-5 py-4 w-32">Tanggal</th>
-                                    <th class="px-5 py-4">Referensi / Keterangan</th>
-                                    <th class="px-5 py-4 text-center bg-emerald-50/50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">Masuk</th>
-                                    <th class="px-5 py-4 text-center bg-red-50/50 dark:bg-red-500/10 text-red-700 dark:text-red-400">Keluar</th>
-                                    <th class="px-5 py-4 text-center text-indigo-700 dark:text-indigo-400">Sisa Stok</th>
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 text-sm uppercase tracking-wider border-b-2 border-gray-200 dark:border-slate-700">
+                                    <th class="px-4 py-3 font-semibold w-32">Tanggal</th>
+                                    <th class="px-4 py-3 font-semibold">Transaksi & Ket.</th>
+                                    <th class="px-4 py-3 font-semibold">No. Ref</th>
+                                    <th class="px-4 py-3 font-semibold">Batch</th>
+                                    <th class="px-4 py-3 font-semibold text-right">Masuk</th>
+                                    <th class="px-4 py-3 font-semibold text-right">Keluar</th>
+                                    <th class="px-4 py-3 font-semibold text-right">Saldo</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-slate-700/50">
-                                <tr class="bg-gray-50/50 dark:bg-slate-800/50">
+                                
+                                <tr class="bg-indigo-50/50 dark:bg-indigo-900/20">
                                     <td colspan="6" class="px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 text-right">
                                         Stok Awal per {{ \Carbon\Carbon::parse($startDate)->format('d/m/Y') }}
                                     </td>
@@ -123,8 +126,6 @@
                                     </td>
                                 </tr>
 
-                                @php $saldoBerjalan = $stokAwal; @endphp
-                                
                                 @forelse($mutasi as $item)
                                     <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
                                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
@@ -145,10 +146,10 @@
                                             {{ $item->batch ? $item->batch->batch_number : '-' }}
                                         </td>
                                         <td class="px-4 py-3 text-sm text-green-600 font-medium text-right">
-                                            {{ $item->movement_type === 'IN' ? '+'.$item->quantity : '-' }}
+                                            {{ $item->movement_type === 'IN' ? '+' . number_format($item->quantity, 0, ',', '.') : '-' }}
                                         </td>
                                         <td class="px-4 py-3 text-sm text-red-600 font-medium text-right">
-                                            {{ $item->movement_type === 'OUT' ? '-'.$item->quantity : '-' }}
+                                            {{ $item->movement_type === 'OUT' ? '-' . number_format($item->quantity, 0, ',', '.') : '-' }}
                                         </td>
                                         <td class="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white text-right">
                                             {{ number_format($item->stock_balance, 0, ',', '.') }}
