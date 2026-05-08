@@ -9,6 +9,7 @@ use App\Models\PharmacyProfile;
 use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\Sale;
+use App\Models\StockCard;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -266,6 +267,17 @@ class Create extends Component
                             'quantity' => $qtyDiambil,
                             'unit_price' => $item['unit_price'], 
                             'subtotal' => $item['unit_price']*$qtyDiambil
+                        ]);
+
+                        StockCard::recordMutation([
+                            'product_id'       => $item['product_id'],
+                            'product_batch_id' => $batch->id,
+                            'user_id'          => Auth::id(),
+                            'transaction_type' => 'sale',
+                            'reference_id'     => $sale->id,
+                            'movement_type'    => 'OUT',
+                            'qty'              => $qtyDiambil,
+                            'notes'            => 'Stok Keluar',
                         ]);
                     }
                     if($qtyDibutuhkan>0){

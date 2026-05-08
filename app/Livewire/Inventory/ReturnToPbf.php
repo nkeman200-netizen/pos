@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
+use App\Models\StockCard;
 use App\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -128,6 +129,17 @@ class ReturnToPbf extends Component
                     'reason' => $this->reason,
                     'unit_price' => $batch->purchase_price ?? 0,
                 ]);
+
+                StockCard::recordMutation([
+                        'product_id'       => $this->product_id,
+                        'product_batch_id' => $this->batchId,
+                        'user_id'          => Auth::id(),
+                        'transaction_type' => 'Return to PBF',
+                        'reference_id'     => $retur->id,
+                        'movement_type'    => 'OUT',
+                        'qty'              => $this->qty,
+                        'notes'            => 'Stok Direturn ke PBF',
+                    ]);
 
                 $batch->decrement('stock', $this->qty);
                 

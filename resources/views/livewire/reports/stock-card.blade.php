@@ -113,28 +113,53 @@
                                     <th class="px-5 py-4 text-center text-indigo-700 dark:text-indigo-400">Sisa Stok</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100 dark:divide-slate-700/50">
-                                @php $runningBalance = $stokAwal; @endphp
-                                @forelse($mutasi as $m)
-                                    @php
-                                        $runningBalance += $m['masuk'];
-                                        $runningBalance -= $m['keluar'];
-                                    @endphp
-                                    <tr class="hover:bg-gray-50/80 dark:hover:bg-slate-700/30 transition-colors">
-                                        <td class="px-5 py-4 font-bold text-gray-600 dark:text-gray-400 text-xs">
-                                            {{ \Carbon\Carbon::parse($m['tanggal'])->format('d/m/Y') }}<br>
-                                            <span class="font-normal text-gray-400">{{ \Carbon\Carbon::parse($m['tanggal'])->format('H:i') }}</span>
+                            <tbody class="divide-y divide-gray-200 dark:divide-slate-700/50">
+                                <tr class="bg-gray-50/50 dark:bg-slate-800/50">
+                                    <td colspan="6" class="px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 text-right">
+                                        Stok Awal per {{ \Carbon\Carbon::parse($startDate)->format('d/m/Y') }}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white text-right">
+                                        {{ number_format($stokAwal, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+
+                                @php $saldoBerjalan = $stokAwal; @endphp
+                                
+                                @forelse($mutasi as $item)
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                            {{ $item->created_at->format('d/m/Y H:i') }}
                                         </td>
-                                        <td class="px-5 py-4">
-                                            <div class="font-black text-gray-800 dark:text-gray-200 text-xs mb-0.5">{{ $m['referensi'] }}</div>
-                                            <div class="text-[11px] text-gray-500 font-medium">{{ $m['keterangan'] }}</div>
+                                        <td class="px-4 py-3 text-sm">
+                                            <span class="font-medium text-gray-800 dark:text-gray-200 uppercase">
+                                                {{ str_replace('_', ' ', $item->transaction_type) }}
+                                            </span>
+                                            @if($item->notes)
+                                                <br><span class="text-xs text-gray-500 dark:text-gray-500">{{ $item->notes }}</span>
+                                            @endif
                                         </td>
-                                        <td class="px-5 py-4 text-center font-black text-emerald-600 dark:text-emerald-400">{{ $m['masuk'] > 0 ? '+'.$m['masuk'] : '-' }}</td>
-                                        <td class="px-5 py-4 text-center font-black text-red-500 dark:text-red-400">{{ $m['keluar'] > 0 ? '-'.$m['keluar'] : '-' }}</td>
-                                        <td class="px-5 py-4 text-center font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-500/5">{{ $runningBalance }}</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                            #{{ $item->reference_id }}
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                            {{ $item->batch ? $item->batch->batch_number : '-' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-green-600 font-medium text-right">
+                                            {{ $item->movement_type === 'IN' ? '+'.$item->quantity : '-' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-red-600 font-medium text-right">
+                                            {{ $item->movement_type === 'OUT' ? '-'.$item->quantity : '-' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white text-right">
+                                            {{ number_format($item->stock_balance, 0, ',', '.') }}
+                                        </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="5" class="px-5 py-16 text-center text-gray-400 font-bold text-sm">Tidak ada transaksi pada periode ini</td></tr>
+                                    <tr>
+                                        <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                            Tidak ada pergerakan stok pada periode ini.
+                                        </td>
+                                    </tr>
                                 @endforelse
                             </tbody>
                         </table>

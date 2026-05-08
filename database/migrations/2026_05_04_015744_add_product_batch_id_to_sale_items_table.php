@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sale_items', function (Blueprint $table) {
-            $table->foreignId('product_batch_id')->nullable()->constrained();
+            $table->unsignedBigInteger('product_batch_id')->nullable();
+            $table->foreign('product_batch_id', 'fk_sale_batch')
+                ->references('id')
+                ->on('product_batches');
         });
     }
 

@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\Purchase;
 use App\Models\PurchaseOrder;
+use App\Models\StockCard;
 use App\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -272,6 +273,16 @@ class Create extends Component
                             'stock' => $item['quantity']
                         ]);
                     }
+                    StockCard::recordMutation([
+                        'product_id'       => $item['product_id'],
+                        'product_batch_id' => $batch->id,
+                        'user_id'          => Auth::id(),
+                        'transaction_type' => 'purchase',
+                        'reference_id'     => $purchase->id,
+                        'movement_type'    => 'IN',
+                        'qty'              => $item['quantity'],
+                        'notes'            => 'Stok Masuk',
+                    ]);
                 }
 
                 if ($this->purchase_order_id) {

@@ -5,6 +5,7 @@ namespace App\Livewire\Inventory;
 use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\StockAdjustment;
+use App\Models\StockCard;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
@@ -49,7 +50,7 @@ class StockOpname extends Component
             $this->searchResults = Product::whereHas('batches')
                 ->where(function($q) use ($value) {
                     $q->where('name', 'like', "%{$value}%")
-                      ->orWhere('sku', 'like', "%{$value}%");
+                        ->orWhere('sku', 'like', "%{$value}%");
                 })
                 ->take(5)->get();
         } else {
@@ -108,10 +109,10 @@ class StockOpname extends Component
                 $actualSystemQty = $batch->stock;
                 $actualDifference = $this->physicalQty - $actualSystemQty;
 
-                StockAdjustment::create([
+                $stockAdust=StockAdjustment::create([
                     'product_id' => $this->productId,
                     'product_batch_id' => $this->batchId,
-                    'user_id' => Auth::id() ?? 1,
+                    'user_id' => Auth::id(),
                     'system_qty' => $actualSystemQty,
                     'physical_qty' => $this->physicalQty,
                     'difference' => $actualDifference,
@@ -119,6 +120,16 @@ class StockOpname extends Component
                 ]);
 
                 $batch->update(['stock' => $this->physicalQty]);
+                StockCard::recordMutation([
+                        'product_id'       => $this->productId,
+                        'product_batch_id' => $this->batchId,
+                        'user_id'          => Auth::id(),
+                        'transaction_type' => 'Stock Opname',
+                        'reference_id'     => $stockAdust->id,
+                        'movement_type'    => $actualDifference>0? 'IN':'OUT',
+                        'qty'              => abs($actualDifference),
+                        'notes'            => 'Stok Opname',
+                    ]);
             });
 
             session()->flash('success', 'Stock Opname berhasil dicatat & stok telah disesuaikan!');
