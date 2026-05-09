@@ -25,6 +25,7 @@ class Create extends Component
     public $sku = '';
     public $name = '';
     public $selling_price = '';
+    public $min_stock; 
     public $csvFile; 
 
     public function getSellingMurniProperty() 
@@ -51,6 +52,7 @@ class Create extends Component
             'sku' => $this->sku,
             'name' => $this->name,
             'selling_price' => $this->sellingMurni,
+            'min_stock' => $this->min_stock, 
             'is_active' => true
         ]);
 

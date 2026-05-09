@@ -16,7 +16,8 @@ class Product extends Model
         'sku',
         'name',
         'selling_price',
-        'is_active'
+        'is_active',
+        'min_stock'
     ];
 
     public function category()
