@@ -10,7 +10,7 @@ new #[Layout('layouts.guest')] class extends Component
 {
     public LoginForm $form;
     public string $pharmacyName = '';
-    public string $logoPath = '';
+    public ?string $logoPath = '';
 
     public function mount(): void
     {
