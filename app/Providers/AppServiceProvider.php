@@ -17,10 +17,13 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+    public function boot(Request $request): void
     {
+        // Memaksa Laravel mempercayai proxy eksternal (Cloudflare Tunnel)
+        $request->server->set('HTTPS', 'on');
+        
         if (config('app.env') === 'production') {
-            \Illuminate\Support\Facades\URL::forceScheme('https');
+            URL::forceScheme('https');
         }
     }
 }
